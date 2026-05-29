@@ -149,6 +149,7 @@ export default function Dashboard() {
     terminateTask, restoreTask, allCategories, addCustomCategory,
     updateCategory, deleteCategory,
     addAttachment, removeAttachment, updateAttachment, exportData, importData, clearAllData,
+    loading, error, refreshData,
   } = useTaskManager();
   const digest = useDailyDigest();
 
@@ -383,6 +384,31 @@ export default function Dashboard() {
     completed: tasks.filter((t) => t.status === "completed").length,
     overdue: tasks.filter((t) => t.status === "overdue").length,
   }), [tasks]);
+
+  if (loading) {
+    return (
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-[#F8FAFC] gap-4">
+        <div className="w-10 h-10 border-4 border-[#E2E8F0] border-t-[#14B8A6] rounded-full animate-spin" />
+        <p className="text-sm text-[#64748B] font-medium">正在加载数据...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-[#F8FAFC] gap-4 p-8">
+        <div className="w-16 h-16 rounded-full bg-[#FFF1F2] flex items-center justify-center text-2xl">⚠️</div>
+        <h2 className="text-lg font-bold text-[#1E293B]">数据加载失败</h2>
+        <p className="text-sm text-[#64748B] text-center max-w-sm">{error}</p>
+        <button
+          onClick={() => refreshData()}
+          className="px-5 py-2.5 bg-[#3B82F6] text-white text-sm font-medium rounded-lg hover:bg-[#2563EB] transition-colors cursor-pointer"
+        >
+          重试
+        </button>
+      </div>
+    );
+  }
 
   return (
     <Layout
