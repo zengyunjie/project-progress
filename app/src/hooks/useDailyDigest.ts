@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { supabase } from "@/lib/supabase";
 
 const DIGEST_KEY = "todoflow-digest-enabled";
 const TIME_KEY = "todoflow-digest-time";
@@ -41,7 +42,6 @@ export function useDailyDigest() {
     setEnabled((prev) => {
       const next = !prev;
       if (next) {
-        // Request permission when enabling
         if (typeof Notification !== "undefined" && Notification.permission === "default") {
           Notification.requestPermission().then((result) => {
             setPermission(result);
@@ -58,39 +58,51 @@ export function useDailyDigest() {
     setPermission(result);
   }, []);
 
-  // Schedule notification check
+  // Schedule notification check — now queries Supabase instead of localStorage
   useEffect(() => {
     if (!enabled) return;
     if (permission !== "granted") return;
 
-    const checkAndNotify = () => {
+    const checkAndNotify = async () => {
       const now = new Date();
-      const currentTime = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+      const currentTime =
+        String(now.getHours()).padStart(2, "0") +
+        ":" +
+        String(now.getMinutes()).padStart(2, "0");
 
       if (currentTime === digestTime) {
         const lastShown = localStorage.getItem(LAST_SHOWN_KEY);
         const today = now.toISOString().split("T")[0];
         if (lastShown !== today) {
           localStorage.setItem(LAST_SHOWN_KEY, today);
-          // Get task counts from localStorage
+
           try {
-            const tasksRaw = localStorage.getItem("todoflow-tasks");
-            const tasks = tasksRaw ? JSON.parse(tasksRaw) : [];
+            // Query Supabase for overdue + due-today tasks
             const todayStr = now.toISOString().split("T")[0];
-            const dueToday = tasks.filter((t: { deadline: string; status: string }) =>
-              t.deadline === todayStr && t.status !== "completed"
-            ).length;
-            const overdue = tasks.filter((t: { status: string }) => t.status === "overdue").length;
+            const { data: tasks } = await supabase
+              .from("tasks")
+              .select("deadline, status");
 
-            let body = "Your daily task digest is ready";
-            if (dueToday > 0) body += ` — ${dueToday} task${dueToday > 1 ? "s" : ""} due today`;
-            if (overdue > 0) body += `, ${overdue} overdue`;
+            if (tasks) {
+              const dueToday = tasks.filter(
+                (t: { deadline: string; status: string }) =>
+                  t.deadline === todayStr && t.status !== "completed"
+              ).length;
+              const overdue = tasks.filter(
+                (t: { status: string }) => t.status === "overdue"
+              ).length;
 
-            new Notification("TodoFlow Daily Digest", {
-              body,
-              icon: undefined,
-              badge: undefined,
-            });
+              let body = "Your daily task digest is ready";
+              if (dueToday > 0)
+                body += ` — ${dueToday} task${dueToday > 1 ? "s" : ""} due today`;
+              if (overdue > 0) body += `, ${overdue} overdue`;
+
+              new Notification("TodoFlow Daily Digest", {
+                body,
+                icon: undefined,
+                badge: undefined,
+              });
+            }
           } catch {
             new Notification("TodoFlow Daily Digest", {
               body: "Check your tasks for today!",

@@ -22,12 +22,6 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
 }
 
-function formatDateTimeShort(isoStr: string): string {
-  const d = new Date(isoStr);
-  return d.toLocaleDateString("zh-CN", { month: "short", day: "numeric" }) +
-    " " + d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-}
-
 function getStatusBadge(task: Task): { text: string; bg: string; textColor: string; dot: string } {
   if (task.status === "terminated") return { text: "已终止", bg: "#F1F5F9", textColor: "#94A3B8", dot: "#94A3B8" };
   if (task.status === "completed") return { text: "已完成", bg: "#ECFDF5", textColor: "#059669", dot: "#10B981" };
@@ -81,7 +75,6 @@ function CategoryCard({
 
   // 最多展示最近 6 个项目，超出折叠
   const maxShow = 6;
-  const [showAll, setShowAll] = useMemo(() => [false, () => {}], []);
   const visibleTasks = activeTasks.slice(0, maxShow);
   const hiddenCount = activeTasks.length - maxShow;
 
@@ -140,7 +133,7 @@ function CategoryCard({
           </div>
         ) : (
           <>
-            {visibleTasks.map((task, idx) => (
+            {visibleTasks.map((task) => (
               <TaskCardItem key={task.id} task={task} categoryColor={category.color} />
             ))}
             {hiddenCount > 0 && (

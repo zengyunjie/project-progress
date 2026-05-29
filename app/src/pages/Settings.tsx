@@ -1,13 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Cloud,
   CloudOff,
   Upload,
   Download,
-  LogIn,
-  LogOut,
-  User,
   Database,
   Trash2,
   FileDown,
@@ -16,30 +13,18 @@ import {
   CheckCircle,
   AlertCircle,
   Settings as SettingsIcon,
-  Shield,
   HardDrive,
   Info,
   Wifi,
-  WifiOff,
-  KeyRound,
   Clock,
-  Save,
-  TestTubes,
-  RotateCw,
   Sparkles,
+  Zap,
 } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useDailyDigest } from "@/hooks/useDailyDigest";
 import { useCloudSync } from "@/hooks/useCloudSync";
 import { useTaskManager } from "@/hooks/useTaskManager";
-import {
-  getStoredFirebaseConfig,
-  saveFirebaseConfig,
-  hasFirebaseConfig,
-} from "@/lib/firebase";
-import type { FirebaseOptions } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
   Card,
@@ -58,46 +43,12 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-/* ═══════════════════════════════════════════
+/* ===========================================
    Settings Page — Kevin's Empire
-   ═══════════════════════════════════════════ */
+   Now powered by Supabase
+   =========================================== */
 
-const CONFIG_KEY = "ke-empire-firebase-config";
 const LAST_SYNC_KEY = "ke-empire-last-sync";
-
-const inputFields = [
-  { key: "apiKey" as const, label: "API Key", placeholder: "AIzaSy..." },
-  { key: "authDomain" as const, label: "Auth Domain", placeholder: "your-app.firebaseapp.com" },
-  { key: "projectId" as const, label: "Project ID", placeholder: "your-project-id" },
-  { key: "storageBucket" as const, label: "Storage Bucket", placeholder: "your-app.appspot.com" },
-  { key: "messagingSenderId" as const, label: "Messaging Sender ID", placeholder: "123456789" },
-  { key: "appId" as const, label: "App ID", placeholder: "1:123456:web:abcdef" },
-] as const;
-
-type ConfigKey = (typeof inputFields)[number]["key"];
-
-/* ─────────────── Helpers ─────────────── */
-
-function getSavedConfig(): Record<string, string> {
-  try {
-    const stored = localStorage.getItem(CONFIG_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch { /* ignore */ }
-  // Seed from the centralized firebase config if present
-  const fbConfig = getStoredFirebaseConfig();
-  const seeded: Record<string, string> = {};
-  if (fbConfig.apiKey) seeded.apiKey = fbConfig.apiKey;
-  if (fbConfig.authDomain) seeded.authDomain = fbConfig.authDomain;
-  if (fbConfig.projectId) seeded.projectId = fbConfig.projectId;
-  if (fbConfig.storageBucket) seeded.storageBucket = fbConfig.storageBucket;
-  if (fbConfig.messagingSenderId) seeded.messagingSenderId = fbConfig.messagingSenderId;
-  if (fbConfig.appId) seeded.appId = fbConfig.appId;
-  return seeded;
-}
-
-function saveConfigToStorage(config: Record<string, string>) {
-  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-}
 
 function getLastSyncTime(): string | null {
   try {
@@ -132,7 +83,7 @@ function formatSyncTime(iso: string | null) {
   });
 }
 
-/* ─────────────── Section Card Wrapper ─────────────── */
+/* ─────────────── Section Card ─────────────── */
 function SectionCard({
   icon: Icon,
   title,
@@ -155,8 +106,8 @@ function SectionCard({
       <Card className="border-[#E2E8F0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] bg-white">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#F0FDFA] flex items-center justify-center shrink-0">
-              <Icon className="w-[18px] h-[18px] text-[#14B8A6]" />
+            <div className="w-9 h-9 rounded-lg bg-[#EEF2FF] flex items-center justify-center shrink-0">
+              <Icon className="w-[18px] h-[18px] text-[#4F46E5]" />
             </div>
             <div>
               <CardTitle className="text-[1rem] font-semibold text-[#1E293B]">
@@ -182,157 +133,35 @@ function StatusBadge({ online }: { online: boolean }) {
     <span
       className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium"
       style={{
-        backgroundColor: online ? "#ECFDF5" : "#F1F5F9",
-        color: online ? "#059669" : "#64748B",
+        backgroundColor: online ? "#ECFDF5" : "#FEF3C7",
+        color: online ? "#059669" : "#D97706",
       }}
     >
-      {online ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-      {online ? "Online" : "Offline"}
+      {online ? <Wifi className="w-3 h-3" /> : <CloudOff className="w-3 h-3" />}
+      {online ? "Connected" : "Offline"}
     </span>
   );
 }
 
-/* ─────────────── Connection Status ─────────────── */
-function ConnectionStatus({
-  connected,
-  message,
-}: {
-  connected: boolean;
-  message: string;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -4 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm"
-      style={{
-        backgroundColor: connected ? "#ECFDF5" : "#FFFBEB",
-        color: connected ? "#059669" : "#D97706",
-      }}
-    >
-      {connected ? (
-        <CheckCircle className="w-4 h-4 shrink-0" />
-      ) : (
-        <AlertCircle className="w-4 h-4 shrink-0" />
-      )}
-      {message}
-    </motion.div>
-  );
-}
-
-/* ═══════════════════════════════════════════
+/* ===========================================
    MAIN SETTINGS PAGE
-   ═══════════════════════════════════════════ */
+   =========================================== */
 export default function Settings() {
   const digest = useDailyDigest();
   const cloudSync = useCloudSync();
   const taskManager = useTaskManager();
 
-  // ── Firebase Config State ──
-  const [config, setConfig] = useState<Record<ConfigKey, string>>(
-    getSavedConfig as Record<ConfigKey, string>
-  );
-  const [configSaved, setConfigSaved] = useState(false);
-  const [testingConnection, setTestingConnection] = useState(false);
-  const [connectionResult, setConnectionResult] = useState<{
-    success: boolean;
-    message: string;
-  } | null>(null);
-
-  // ── Clear Data Dialog ──
-  const [clearDialogOpen, setClearDialogOpen] = useState(false);
-
   // ── Real-time sync ──
   const [realtimeSync, setRealtimeSync] = useState(false);
   const realtimeCleanupRef = useRef<(() => void) | null>(null);
 
-  // ── Derived ──
-  const hasAnyConfig = Object.values(config).some((v) => v.trim() !== "");
-  const allFieldsFilled = inputFields.every((f) => config[f.key]?.trim() !== "");
-  const isConfigured = cloudSync.isConfigured;
+  // ── Clear Data Dialog ──
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
+
+  // ── Connection check ──
+  const isOnline = typeof navigator !== "undefined" ? navigator.onLine : false;
 
   // ── Handlers ──
-
-  const handleConfigChange = (key: ConfigKey, value: string) => {
-    setConfig((prev) => ({ ...prev, [key]: value }));
-    setConfigSaved(false);
-    setConnectionResult(null);
-  };
-
-  const handleSaveConfig = () => {
-    saveConfigToStorage(config);
-
-    // Also sync to the centralized firebase config
-    const firebaseConfig: FirebaseOptions = {
-      apiKey: config.apiKey || "",
-      authDomain: config.authDomain || "",
-      projectId: config.projectId || "",
-      storageBucket: config.storageBucket || "",
-      messagingSenderId: config.messagingSenderId || "",
-      appId: config.appId || "",
-    };
-    saveFirebaseConfig(firebaseConfig);
-
-    setConfigSaved(true);
-    toast.success("Firebase configuration saved");
-    setTimeout(() => setConfigSaved(false), 3000);
-  };
-
-  const handleTestConnection = async () => {
-    if (!allFieldsFilled) {
-      toast.error("Please fill in all Firebase config fields first");
-      return;
-    }
-    setTestingConnection(true);
-    setConnectionResult(null);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      const firebaseConfig: FirebaseOptions = {
-        apiKey: config.apiKey,
-        authDomain: config.authDomain,
-        projectId: config.projectId,
-        storageBucket: config.storageBucket,
-        messagingSenderId: config.messagingSenderId,
-        appId: config.appId,
-      };
-
-      saveFirebaseConfig(firebaseConfig);
-      setConnectionResult({
-        success: true,
-        message: "Connection successful! Firebase is ready to use.",
-      });
-      toast.success("Firebase connection successful");
-    } catch {
-      setConnectionResult({
-        success: false,
-        message: "Connection failed. Please check your configuration values.",
-      });
-      toast.error("Firebase connection failed");
-    } finally {
-      setTestingConnection(false);
-    }
-  };
-
-  const handleSignIn = async () => {
-    try {
-      await cloudSync.signIn();
-      toast.success("Signed in successfully");
-    } catch {
-      toast.error("Sign in failed");
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await cloudSync.signOut();
-      setRealtimeSync(false);
-      toast.success("Signed out");
-    } catch {
-      toast.error("Sign out failed");
-    }
-  };
 
   const handleUploadToCloud = async () => {
     try {
@@ -343,9 +172,9 @@ export default function Settings() {
       if (result) {
         const now = new Date().toISOString();
         setLastSyncTime(now);
-        toast.success(`Uploaded ${tasks.length} tasks to cloud`);
+        toast.success(`Uploaded ${tasks.length} tasks to Supabase`);
       } else {
-        toast.error("Upload failed. Make sure you're signed in.");
+        toast.error("Upload failed. Check your connection.");
       }
     } catch {
       toast.error("Upload failed");
@@ -358,10 +187,9 @@ export default function Settings() {
       if (result) {
         const now = new Date().toISOString();
         setLastSyncTime(now);
-        if (result.tasks) {
-          localStorage.setItem("todoflow-tasks", JSON.stringify(result.tasks));
-        }
-        toast.success("Downloaded data from cloud. Refresh to see changes.");
+        toast.success(
+          `Downloaded ${result.tasks.length} tasks from Supabase. Refresh to apply.`
+        );
       } else {
         toast.error("No cloud data found");
       }
@@ -373,14 +201,15 @@ export default function Settings() {
   const handleToggleRealtimeSync = (enabled: boolean) => {
     setRealtimeSync(enabled);
     if (enabled) {
-      if (realtimeCleanupRef.current) {
-        realtimeCleanupRef.current();
-      }
-      realtimeCleanupRef.current = cloudSync.startRealtimeSync((tasks) => {
-        if (tasks) {
-          localStorage.setItem("todoflow-tasks", JSON.stringify(tasks));
+      if (realtimeCleanupRef.current) realtimeCleanupRef.current();
+
+      realtimeCleanupRef.current = cloudSync.startRealtimeSync(
+        (tasks, _categories) => {
+          toast.info(`Real-time update: ${tasks.length} tasks synced`, {
+            duration: 2000,
+          });
         }
-      });
+      );
       toast.success("Real-time sync enabled");
     } else {
       cloudSync.stopRealtimeSync();
@@ -399,7 +228,8 @@ export default function Settings() {
 
       const exportData = {
         app: "Kevin's Empire",
-        version: "1.0.0",
+        version: "2.0.0",
+        backend: "Supabase",
         exportedAt: new Date().toISOString(),
         tasks,
         categories,
@@ -413,19 +243,25 @@ export default function Settings() {
     }
   };
 
-  const handleImportData = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportData = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = JSON.parse(e.target?.result as string);
         if (!data.tasks || !Array.isArray(data.tasks)) {
           throw new Error("Invalid backup file format");
         }
-        localStorage.setItem("todoflow-tasks", JSON.stringify(data.tasks));
-        toast.success(`Imported ${data.tasks.length} tasks. Refresh to see changes.`);
+        const success = await taskManager.importData(
+          JSON.stringify({ tasks: data.tasks, categories: data.categories || [] })
+        );
+        if (success) {
+          toast.success(`Imported ${data.tasks.length} tasks. Data synced to Supabase.`);
+        } else {
+          toast.error("Import failed");
+        }
       } catch {
         toast.error("Failed to import. Invalid file format.");
       }
@@ -434,15 +270,13 @@ export default function Settings() {
     event.target.value = "";
   };
 
-  const handleClearAllData = () => {
-    localStorage.removeItem("todoflow-tasks");
-    localStorage.removeItem(CONFIG_KEY);
+  const handleClearAllData = async () => {
+    await taskManager.clearAllData();
     localStorage.removeItem(LAST_SYNC_KEY);
-    setConfig({ apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: "" });
     setRealtimeSync(false);
     cloudSync.stopRealtimeSync();
     setClearDialogOpen(false);
-    toast.success("All local data has been cleared. Refresh the page.");
+    toast.success("All data has been cleared from local and cloud.");
   };
 
   // Sync error display
@@ -456,10 +290,10 @@ export default function Settings() {
     <Layout
       dailyDigestEnabled={digest.enabled}
       onToggleDigest={digest.toggleEnabled}
-      onNewTask={() => { /* no-op on settings page */ }}
+      onNewTask={() => { /* no-op */ }}
     >
       <div className="max-w-[800px] mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        {/* ═══════════ Page Header ═══════════ */}
+        {/* Page Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -467,214 +301,68 @@ export default function Settings() {
           className="mb-8"
         >
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-[#F0FDFA] flex items-center justify-center">
-              <SettingsIcon className="w-5 h-5 text-[#14B8A6]" />
+            <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] flex items-center justify-center">
+              <SettingsIcon className="w-5 h-5 text-[#4F46E5]" />
             </div>
             <div>
               <h1 className="text-[1.75rem] font-bold text-[#1E293B] tracking-tight leading-tight">
                 Settings
               </h1>
               <p className="text-[0.9375rem] text-[#94A3B8]">
-                Configure cloud sync, manage your data, and app info
+                Supabase cloud sync · real-time collaboration · data management
               </p>
             </div>
           </div>
         </motion.div>
 
-        {/* ═══════════ Settings Sections ═══════════ */}
+        {/* Settings Sections */}
         <div className="flex flex-col gap-6">
 
-          {/* ─────── Cloud Sync Configuration ─────── */}
+          {/* ─── Cloud Sync — Supabase ─── */}
           <SectionCard
             icon={Cloud}
-            title="Cloud Sync Configuration"
-            description="Connect your Firebase project to enable cloud backup and sync"
+            title="Cloud Sync · Supabase"
+            description="Real-time multi-device sync powered by Supabase"
             delay={0.1}
           >
-            {/* Firebase Config Form */}
+            {/* Connection Status */}
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-[#334155] flex items-center gap-2">
-                  <KeyRound className="w-4 h-4 text-[#94A3B8]" />
-                  Firebase Configuration
-                </h3>
-                <div className="flex items-center gap-2">
-                  {isConfigured && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] text-xs font-medium">
-                      <CheckCircle className="w-3 h-3" /> Active
-                    </span>
-                  )}
-                  {configSaved && (
-                    <motion.span
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="text-xs font-medium text-[#059669] flex items-center gap-1"
-                    >
-                      <CheckCircle className="w-3 h-3" /> Saved
-                    </motion.span>
-                  )}
+              <div className="flex items-center justify-between p-4 bg-[#F0FDF4] rounded-xl border border-[#BBF7D0]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#DCFCE7] flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-[#16A34A]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#166534]">
+                      Supabase Connected
+                    </p>
+                    <p className="text-xs text-[#15803D]">
+                      Anonymous access · real-time enabled · all devices synced
+                    </p>
+                  </div>
                 </div>
+                <StatusBadge online={isOnline} />
               </div>
 
-              {/* Config Input Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {inputFields.map(({ key, label, placeholder }, idx) => (
-                  <motion.div
-                    key={key}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15 + idx * 0.03 }}
-                  >
-                    <label className="block text-[0.75rem] font-medium text-[#64748B] mb-1">
-                      {label}
-                    </label>
-                    <Input
-                      type="text"
-                      value={config[key] || ""}
-                      onChange={(e) => handleConfigChange(key, e.target.value)}
-                      placeholder={placeholder}
-                      className="h-9 text-sm bg-[#F8FAFC] border-[#E2E8F0] focus:bg-white focus:border-[#14B8A6] focus:ring-[#14B8A6]/20"
-                    />
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Help Text */}
               <p className="text-xs text-[#94A3B8] leading-relaxed">
-                Get these values from your Firebase Console &rarr; Project Settings &rarr; General &rarr; Your Apps &rarr; SDK Setup.
+                Your data is stored in Supabase PostgreSQL and synced across all devices
+                in real-time. No login required — just open the URL and start working.
                 <a
-                  href="https://console.firebase.google.com"
+                  href="https://supabase.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 ml-1 text-[#14B8A6] hover:text-[#0D9488] font-medium transition-colors"
+                  className="inline-flex items-center gap-1 ml-1 text-[#4F46E5] hover:text-[#4338CA] font-medium transition-colors"
                 >
-                  Open Firebase Console
+                  Learn more
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </p>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3 mt-1">
-                <Button
-                  onClick={handleSaveConfig}
-                  disabled={!hasAnyConfig}
-                  className="bg-[#14B8A6] hover:bg-[#0D9488] text-white h-9 text-sm font-medium disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4 mr-1.5" />
-                  Save Configuration
-                </Button>
-                <Button
-                  onClick={handleTestConnection}
-                  disabled={!allFieldsFilled || testingConnection}
-                  variant="outline"
-                  className="h-9 text-sm font-medium border-[#E2E8F0] text-[#475569] hover:bg-[#F1F5F9] hover:text-[#334155] disabled:opacity-50"
-                >
-                  {testingConnection ? (
-                    <RotateCw className="w-4 h-4 mr-1.5 animate-spin" />
-                  ) : (
-                    <TestTubes className="w-4 h-4 mr-1.5" />
-                  )}
-                  {testingConnection ? "Testing..." : "Test Connection"}
-                </Button>
-              </div>
-
-              {/* Connection Result */}
-              <AnimatePresence>
-                {connectionResult && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <ConnectionStatus
-                      connected={connectionResult.success}
-                      message={connectionResult.message}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
 
             {/* Divider */}
             <div className="h-px bg-[#E2E8F0] my-6" />
 
-            {/* ── Authentication Section ── */}
-            <div className="flex flex-col gap-4">
-              <h3 className="text-sm font-semibold text-[#334155] flex items-center gap-2">
-                <Shield className="w-4 h-4 text-[#94A3B8]" />
-                Authentication
-              </h3>
-
-              {cloudSync.isLoading ? (
-                <div className="flex items-center gap-3 p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
-                  <RotateCw className="w-5 h-5 text-[#94A3B8] animate-spin" />
-                  <p className="text-sm text-[#64748B]">Loading auth state...</p>
-                </div>
-              ) : !cloudSync.user ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex flex-col gap-3"
-                >
-                  <p className="text-sm text-[#64748B]">
-                    Sign in with Google to enable cloud sync features.
-                  </p>
-                  <Button
-                    onClick={handleSignIn}
-                    className="w-fit bg-white border border-[#E2E8F0] text-[#334155] hover:bg-[#F8FAFC] h-10 px-5 text-sm font-medium shadow-sm"
-                  >
-                    <LogIn className="w-4 h-4 mr-2 text-[#14B8A6]" />
-                    Sign in with Google
-                  </Button>
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex flex-col gap-4"
-                >
-                  {/* User Profile Card */}
-                  <div className="flex items-center gap-4 p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
-                    <div className="w-12 h-12 rounded-full bg-[#14B8A6] flex items-center justify-center text-white text-lg font-semibold shrink-0 overflow-hidden">
-                      {cloudSync.user.photoURL ? (
-                        <img
-                          src={cloudSync.user.photoURL}
-                          alt=""
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-5 h-5" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#1E293B] truncate">
-                        {cloudSync.user.displayName || "User"}
-                      </p>
-                      <p className="text-xs text-[#94A3B8] truncate">
-                        {cloudSync.user.email}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <StatusBadge online={typeof navigator !== "undefined" ? navigator.onLine : false} />
-                      </div>
-                    </div>
-                    <Button
-                      onClick={handleSignOut}
-                      variant="outline"
-                      size="sm"
-                      className="h-8 text-xs border-[#E2E8F0] text-[#64748B] hover:text-[#F43F5E] hover:bg-[#FFF1F2] hover:border-[#F43F5E]/30"
-                    >
-                      <LogOut className="w-3.5 h-3.5 mr-1.5" />
-                      Sign Out
-                    </Button>
-                  </div>
-                </motion.div>
-              )}
-            </div>
-
-            {/* Divider */}
-            <div className="h-px bg-[#E2E8F0] my-6" />
-
-            {/* ── Sync Actions ── */}
+            {/* Sync Actions */}
             <div className="flex flex-col gap-4">
               <h3 className="text-sm font-semibold text-[#334155] flex items-center gap-2">
                 <HardDrive className="w-4 h-4 text-[#94A3B8]" />
@@ -685,11 +373,10 @@ export default function Settings() {
                 <Button
                   onClick={handleUploadToCloud}
                   variant="outline"
-                  disabled={!cloudSync.user}
-                  className="h-10 justify-start text-sm font-medium border-[#E2E8F0] text-[#475569] hover:bg-[#F0FDFA] hover:text-[#0D9488] hover:border-[#14B8A6]/30 transition-all disabled:opacity-40"
+                  className="h-10 justify-start text-sm font-medium border-[#E2E8F0] text-[#475569] hover:bg-[#EEF2FF] hover:text-[#4338CA] hover:border-[#4F46E5]/30 transition-all"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#F0FDFA] flex items-center justify-center mr-3 shrink-0">
-                    <Upload className="w-4 h-4 text-[#14B8A6]" />
+                  <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center mr-3 shrink-0">
+                    <Upload className="w-4 h-4 text-[#4F46E5]" />
                   </div>
                   <div className="text-left">
                     <div className="text-sm font-medium">Upload to Cloud</div>
@@ -700,8 +387,7 @@ export default function Settings() {
                 <Button
                   onClick={handleDownloadFromCloud}
                   variant="outline"
-                  disabled={!cloudSync.user}
-                  className="h-10 justify-start text-sm font-medium border-[#E2E8F0] text-[#475569] hover:bg-[#EFF6FF] hover:text-[#2563EB] hover:border-[#3B82F6]/30 transition-all disabled:opacity-40"
+                  className="h-10 justify-start text-sm font-medium border-[#E2E8F0] text-[#475569] hover:bg-[#EFF6FF] hover:text-[#2563EB] hover:border-[#3B82F6]/30 transition-all"
                 >
                   <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] flex items-center justify-center mr-3 shrink-0">
                     <Download className="w-4 h-4 text-[#3B82F6]" />
@@ -713,52 +399,50 @@ export default function Settings() {
                 </Button>
               </div>
 
-              {/* Real-time Sync Toggle */}
+              {/* Real-time Toggle */}
               <div className="flex items-center justify-between p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#F0FDFA] flex items-center justify-center shrink-0">
-                    {realtimeSync ? (
-                      <Cloud className="w-4 h-4 text-[#14B8A6]" />
-                    ) : (
-                      <CloudOff className="w-4 h-4 text-[#94A3B8]" />
-                    )}
+                  <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center shrink-0">
+                    <Zap className="w-4 h-4 text-[#4F46E5]" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#334155]">Real-time Sync</p>
                     <p className="text-xs text-[#94A3B8]">
                       {realtimeSync
                         ? "Listening for cloud changes..."
-                        : "Automatically sync changes in real-time"}
+                        : "Auto-sync changes across all devices"}
                     </p>
                   </div>
                 </div>
                 <Switch
                   checked={realtimeSync}
                   onCheckedChange={handleToggleRealtimeSync}
-                  disabled={!cloudSync.user}
                 />
               </div>
 
-              {/* Last Sync Time */}
+              {/* Last Sync */}
               <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
                 <Clock className="w-3.5 h-3.5" />
                 <span>Last synced:</span>
                 <span className="font-medium text-[#64748B]">
-                  {formatSyncTime(cloudSync.lastSync ? new Date(cloudSync.lastSync).toISOString() : getLastSyncTime())}
+                  {formatSyncTime(
+                    cloudSync.lastSync
+                      ? new Date(cloudSync.lastSync).toISOString()
+                      : getLastSyncTime()
+                  )}
                 </span>
               </div>
             </div>
           </SectionCard>
 
-          {/* ─────── Data Management ─────── */}
+          {/* ─── Data Management ─── */}
           <SectionCard
             icon={Database}
             title="Data Management"
-            description="Export, import, or clear your local task data"
+            description="Export, import, or clear your task data"
             delay={0.2}
           >
             <div className="flex flex-col gap-3">
-              {/* Export */}
               <Button
                 onClick={handleExportData}
                 variant="outline"
@@ -769,11 +453,12 @@ export default function Settings() {
                 </div>
                 <div className="text-left">
                   <div className="text-sm font-medium">Export Data</div>
-                  <div className="text-[0.6875rem] text-[#94A3B8]">Download all tasks as JSON</div>
+                  <div className="text-[0.6875rem] text-[#94A3B8]">
+                    Download all tasks as JSON backup
+                  </div>
                 </div>
               </Button>
 
-              {/* Import */}
               <div className="relative">
                 <input
                   type="file"
@@ -789,16 +474,16 @@ export default function Settings() {
                     </div>
                     <div className="text-left">
                       <div className="text-sm font-medium">Import Data</div>
-                      <div className="text-[0.6875rem] text-[#94A3B8]">Restore from JSON backup</div>
+                      <div className="text-[0.6875rem] text-[#94A3B8]">
+                        Restore from JSON backup &amp; sync to cloud
+                      </div>
                     </div>
                   </div>
                 </label>
               </div>
 
-              {/* Divider */}
               <div className="h-px bg-[#E2E8F0] my-2" />
 
-              {/* Clear All Data */}
               <Button
                 onClick={() => setClearDialogOpen(true)}
                 variant="outline"
@@ -809,49 +494,61 @@ export default function Settings() {
                 </div>
                 <div className="text-left">
                   <div className="text-sm font-medium">Clear All Data</div>
-                  <div className="text-[0.6875rem] text-[#94A3B8]">Permanently delete all local data</div>
+                  <div className="text-[0.6875rem] text-[#94A3B8]">
+                    Delete all data (local + cloud)
+                  </div>
                 </div>
               </Button>
             </div>
           </SectionCard>
 
-          {/* ─────── About ─────── */}
-          <SectionCard
-            icon={Info}
-            title="About"
-            delay={0.3}
-          >
+          {/* ─── About ─── */}
+          <SectionCard icon={Info} title="About" delay={0.3}>
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#F0FDFA] flex items-center justify-center shrink-0 shadow-sm">
-                  <Sparkles className="w-7 h-7 text-[#14B8A6]" />
+                <div className="w-14 h-14 rounded-2xl bg-[#EEF2FF] flex items-center justify-center shrink-0 shadow-sm">
+                  <Sparkles className="w-7 h-7 text-[#4F46E5]" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-[#1E293B]">
                     Kevin&apos;s Empire
                   </h3>
-                  <p className="text-sm text-[#94A3B8]">Task Management</p>
+                  <p className="text-sm text-[#94A3B8]">
+                    Task Management · Powered by Supabase
+                  </p>
                 </div>
-                <span className="ml-auto px-3 py-1 rounded-full bg-[#F1F5F9] text-[#64748B] text-xs font-mono font-medium">
-                  v1.0.0
+                <span className="ml-auto px-3 py-1 rounded-full bg-[#EEF2FF] text-[#4F46E5] text-xs font-mono font-medium">
+                  v2.0.0
                 </span>
               </div>
 
               <p className="text-sm text-[#64748B] leading-relaxed">
-                Kevin&apos;s Empire is a powerful yet simple task management application designed
-                to help you organize, track, and complete your projects efficiently. Features
-                include progress tracking with history, categorized tasks, daily digest
-                notifications, and cloud synchronization via Firebase.
+                Kevin&apos;s Empire is a multi-device task management application powered
+                by Supabase PostgreSQL. All changes sync in real-time across every device —
+                no login required. Features include progress tracking with history,
+                categorized tasks, daily digest notifications, and instant cloud synchronization.
               </p>
 
-              <div className="grid grid-cols-2 gap-3 mt-1">
+              <div className="grid grid-cols-3 gap-3 mt-1">
                 <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
-                  <p className="text-[0.6875rem] uppercase tracking-wider text-[#94A3B8] font-medium mb-1">Tasks</p>
-                  <TaskCount />
+                  <p className="text-[0.6875rem] uppercase tracking-wider text-[#94A3B8] font-medium mb-1">
+                    Tasks
+                  </p>
+                  <p className="text-lg font-bold text-[#1E293B]">{taskManager.tasks.length}</p>
                 </div>
                 <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
-                  <p className="text-[0.6875rem] uppercase tracking-wider text-[#94A3B8] font-medium mb-1">Storage</p>
-                  <p className="text-lg font-bold text-[#1E293B]">Local</p>
+                  <p className="text-[0.6875rem] uppercase tracking-wider text-[#94A3B8] font-medium mb-1">
+                    Backend
+                  </p>
+                  <p className="text-lg font-bold text-[#16A34A]">Supabase</p>
+                </div>
+                <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                  <p className="text-[0.6875rem] uppercase tracking-wider text-[#94A3B8] font-medium mb-1">
+                    Sync
+                  </p>
+                  <p className="text-lg font-bold text-[#4F46E5]">
+                    {realtimeSync ? "Live" : "Manual"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -859,7 +556,7 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* ═══════════ Clear Data Confirmation Dialog ═══════════ */}
+      {/* Clear Data Dialog */}
       <Dialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
         <DialogContent className="max-w-[420px] w-[90vw] bg-white rounded-2xl border-0 shadow-[0_24px_48px_rgba(0,0,0,0.15)]">
           <DialogHeader className="text-center sm:text-left">
@@ -875,7 +572,8 @@ export default function Settings() {
             </DialogTitle>
             <DialogDescription className="text-sm text-[#64748B] mt-2">
               This will permanently delete all your tasks, progress history,
-              and Firebase configuration from local storage. This action cannot be undone.
+              and categories from BOTH local storage and Supabase cloud.
+              This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-6 flex gap-3 sm:flex-row flex-col">
@@ -898,20 +596,4 @@ export default function Settings() {
       </Dialog>
     </Layout>
   );
-}
-
-/* ─────────────── Sub-components ─────────────── */
-
-function TaskCount() {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("todoflow-tasks");
-      if (raw) {
-        const tasks = JSON.parse(raw);
-        setCount(Array.isArray(tasks) ? tasks.length : 0);
-      }
-    } catch { /* ignore */ }
-  }, []);
-  return <p className="text-lg font-bold text-[#1E293B]">{count}</p>;
 }

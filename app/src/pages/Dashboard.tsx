@@ -147,7 +147,7 @@ export default function Dashboard() {
   const {
     tasks, addTask, updateTask, deleteTask, toggleComplete,
     terminateTask, allCategories, addCustomCategory,
-    updateCategory, deleteCategory,
+    updateCategory,
     addAttachment, removeAttachment, exportData, importData, clearAllData,
   } = useTaskManager();
   const digest = useDailyDigest();
@@ -347,9 +347,9 @@ export default function Dashboard() {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const text = ev.target?.result as string;
-      const ok = importData(text);
+      const ok = await importData(text);
       if (ok) {
         toast.success("数据导入成功！页面将自动刷新。");
         setTimeout(() => window.location.reload(), 1000);
@@ -858,9 +858,9 @@ export default function Dashboard() {
               <button onClick={() => { setShowCategoryDialog(false); setNewCategoryName(""); setNewCategoryColor("#14B8A6"); }}
                 className="px-5 py-2 bg-[#F1F5F9] text-[#334155] text-sm font-medium rounded-lg h-10 hover:bg-[#E2E8F0] transition-colors cursor-pointer">取消</button>
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                onClick={() => {
+                onClick={async () => {
                   if (!newCategoryName.trim()) return;
-                  const newCat = addCustomCategory(newCategoryName.trim(), newCategoryColor);
+                  const newCat = await addCustomCategory(newCategoryName.trim(), newCategoryColor);
                   setFormCategory(newCat.id);
                   setShowCategoryDialog(false);
                   setNewCategoryName("");
