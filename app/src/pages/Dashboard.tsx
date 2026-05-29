@@ -146,9 +146,9 @@ export default function Dashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     tasks, addTask, updateTask, deleteTask, toggleComplete,
-    terminateTask, allCategories, addCustomCategory,
+    terminateTask, restoreTask, allCategories, addCustomCategory,
     updateCategory, deleteCategory,
-    addAttachment, removeAttachment, exportData, importData, clearAllData,
+    addAttachment, removeAttachment, updateAttachment, exportData, importData, clearAllData,
   } = useTaskManager();
   const digest = useDailyDigest();
 
@@ -180,6 +180,14 @@ export default function Dashboard() {
 
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
   const [showTerminated, setShowTerminated] = useState(false);
+
+  // Clear data confirmation
+  const [clearDataOpen, setClearDataOpen] = useState(false);
+  const [clearDataConfirmText, setClearDataConfirmText] = useState("");
+  const [clearDataClearing, setClearDataClearing] = useState(false);
+
+  // Attachment preview
+  const [previewAttachment, setPreviewAttachment] = useState<{ name: string; dataUrl: string } | null>(null);
 
   // Hash navigation
   useEffect(() => {
@@ -237,12 +245,19 @@ export default function Dashboard() {
   }, [tasks, filter, search, sortBy, showTerminated]);
 
   // Modal helpers
+  const getDefaultDeadline = (createdDate: string) => {
+    const d = new Date(createdDate + "T00:00:00");
+    d.setDate(d.getDate() + 15);
+    return d.toISOString().split("T")[0];
+  };
+
   const openNewTask = () => {
     setEditingTask(null);
     setFormName("");
     setFormCategory("new-product");
-    setFormCreated(getToday());
-    setFormDeadline("");
+    const today = getToday();
+    setFormCreated(today);
+    setFormDeadline(getDefaultDeadline(today));
     setFormProgress(0);
     setFormNote("");
     setFormErrors({});
@@ -430,7 +445,7 @@ export default function Dashboard() {
           <button onClick={handleImport} className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#334155] transition-colors cursor-pointer">
             <UploadIcon className="w-4 h-4" /> 导入数据
           </button>
-          <button onClick={clearAllData} className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-[#F43F5E] hover:bg-[#FFF1F2] transition-colors cursor-pointer mt-1">
+          <button onClick={() => setClearDataOpen(true)} className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-[#F43F5E] hover:bg-[#FFF1F2] transition-colors cursor-pointer mt-1">
             <Trash2 className="w-4 h-4" /> 清除全部数据
           </button>
         </motion.aside>
@@ -659,6 +674,10 @@ export default function Dashboard() {
                               <span className="font-mono text-xs text-[#94A3B8]">#{index + 1}</span>
                               <span className="flex-1 text-sm font-semibold text-[#64748B] line-through truncate">{task.name}</span>
                               <span className="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F1F5F9] text-[#64748B]">已终止</span>
+                              <button onClick={() => handleRestore(task)}
+                                className="w-8 h-8 flex items-center justify-center rounded-md text-[#F59E0B] hover:text-[#D97706] hover:bg-[#FFFBEB] cursor-pointer transition-all" title="恢复项目">
+                                <UndoIcon className="w-3.5 h-3.5" />
+                              </button>
                               <button onClick={() => openEditTask(task)} className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#14B8A6] cursor-pointer" title="编辑"><Pencil className="w-3.5 h-3.5" /></button>
                               <button onClick={() => handleDelete(task)} className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#F43F5E] cursor-pointer" title="删除"><Trash2 className="w-3.5 h-3.5" /></button>
                             </div>
@@ -719,7 +738,7 @@ export default function Dashboard() {
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="flex gap-4">
               <div className="flex-1">
                 <label className="block text-[0.8125rem] font-medium text-[#64748B] mb-1">创建日期</label>
-                <Input type="date" value={formCreated} onChange={(e) => setFormCreated(e.target.value)}
+                <Input type="date" value={formCreated} onChange={(e) => { setFormCreated(e.target.value); if (!editingTask) setFormDeadline(getDefaultDeadline(e.target.value)); }}
                   className="h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#14B8A6]/20 focus:border-[#14B8A6] transition-all" />
               </div>
               <div className="flex-1">
@@ -794,12 +813,23 @@ export default function Dashboard() {
                   {editingTask.attachments && editingTask.attachments.length > 0 && (
                     <div className="flex flex-col gap-1.5 mt-2">
                       {editingTask.attachments.map((att) => (
-                        <div key={att.id} className="flex items-center gap-2 py-1.5 px-2 rounded-md bg-[#F8FAFC] text-xs group">
+                        <div key={att.id} className="flex items-center gap-2 py-2 px-3 rounded-md bg-[#F8FAFC] text-xs border border-[#E2E8F0] group hover:border-[#CBD5E1] transition-all">
                           <FileText className="w-3.5 h-3.5 text-[#94A3B8] shrink-0" />
-                          <span className="flex-1 truncate text-[#475569]">{att.name}</span>
-                          <span className="text-[#94A3B8] font-mono text-[0.625rem]">{(att.size / 1024).toFixed(1)} KB</span>
+                          <span className="flex-1 truncate text-[#475569] font-medium">{att.name}</span>
+                          <span className="text-[#94A3B8] font-mono text-[0.625rem] shrink-0">{(att.size / 1024).toFixed(1)} KB</span>
+                          <button onClick={() => setPreviewAttachment({ name: att.name, dataUrl: att.dataUrl })}
+                            className="w-6 h-6 flex items-center justify-center rounded text-[#3B82F6] hover:text-[#2563EB] hover:bg-[#EFF6FF] transition-all cursor-pointer shrink-0" title="预览">
+                            <EyeIcon className="w-3 h-3" />
+                          </button>
+                          <label className="w-6 h-6 flex items-center justify-center rounded text-[#94A3B8] hover:text-[#14B8A6] hover:bg-[#F0FDFA] transition-all cursor-pointer shrink-0" title="替换">
+                            <ReplaceIcon className="w-3 h-3" />
+                            <input type="file" className="hidden" onChange={async (e) => {
+                              const file = e.target.files?.[0]; if (!file || !editingTask) return;
+                              await updateAttachment(editingTask.id, att.id, file); e.target.value = "";
+                            }} />
+                          </label>
                           <button onClick={() => removeAttachment(editingTask.id, att.id)}
-                            className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-[#94A3B8] hover:text-[#F43F5E] transition-all cursor-pointer" title="删除">
+                            className="w-6 h-6 flex items-center justify-center rounded text-[#94A3B8] hover:text-[#F43F5E] hover:bg-[#FFF1F2] transition-all cursor-pointer shrink-0" title="删除">
                             <X className="w-3 h-3" />
                           </button>
                         </div>
@@ -873,6 +903,103 @@ export default function Dashboard() {
 
       <DeleteModal task={deleteTaskData} open={deleteOpen} onClose={() => setDeleteOpen(false)} onConfirm={confirmDelete} />
 
+      {/* Clear Data Confirmation Dialog */}
+      <Dialog open={clearDataOpen} onOpenChange={(open) => { if (!open) { setClearDataOpen(false); setClearDataConfirmText(""); } }}>
+        <DialogContent className="max-w-[440px] w-[90vw] p-8 bg-white rounded-2xl shadow-[0_24px_48px_rgba(0,0,0,0.15)] border-0 gap-0">
+          <div className="flex flex-col items-center text-center">
+            <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
+              className="w-14 h-14 rounded-full bg-[#FFF1F2] flex items-center justify-center mb-5">
+              <AlertTriangle className="w-7 h-7 text-[#F43F5E]" />
+            </motion.div>
+            <h3 className="text-[1.25rem] font-bold text-[#1E293B] mb-2">⚠️ 清除全部数据</h3>
+            <div className="w-full bg-[#FFF1F2] border border-[#FECDD3] rounded-lg p-4 mb-4 text-left">
+              <p className="text-sm text-[#BE123C] font-medium mb-2">此操作将执行以下不可逆操作：</p>
+              <ul className="text-xs text-[#E11D48] space-y-1.5 list-disc list-inside">
+                <li>删除所有 <strong>任务</strong> 及其进度历史</li>
+                <li>删除所有 <strong>附件</strong> 文件</li>
+                <li>删除所有 <strong>自定义分类</strong></li>
+                <li>重置分类为默认值（新产品开发 / 日常订单跟进 / 临时项目）</li>
+              </ul>
+            </div>
+            <p className="text-sm text-[#64748B] mb-5">
+              请在下方输入 <span className="font-bold text-[#F43F5E]">确认删除</span> 以继续：
+            </p>
+            <Input
+              value={clearDataConfirmText}
+              onChange={(e) => setClearDataConfirmText(e.target.value)}
+              placeholder='输入 "确认删除"'
+              className="h-11 w-full rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#F43F5E]/20 focus:border-[#F43F5E] transition-all text-center"
+            />
+            <div className="flex gap-3 mt-6 w-full">
+              <button onClick={() => { setClearDataOpen(false); setClearDataConfirmText(""); }}
+                className="flex-1 px-5 py-2.5 bg-[#F1F5F9] text-[#334155] text-sm font-medium rounded-lg h-11 hover:bg-[#E2E8F0] transition-colors cursor-pointer">
+                取消
+              </button>
+              <motion.button
+                whileHover={{ scale: clearDataConfirmText === "确认删除" && !clearDataClearing ? 1.02 : 1 }}
+                whileTap={{ scale: clearDataConfirmText === "确认删除" && !clearDataClearing ? 0.98 : 1 }}
+                onClick={handleClearData}
+                disabled={clearDataConfirmText !== "确认删除" || clearDataClearing}
+                className={`flex-1 px-5 py-2.5 text-sm font-semibold rounded-lg h-11 transition-all cursor-pointer ${
+                  clearDataConfirmText === "确认删除" && !clearDataClearing
+                    ? "bg-[#F43F5E] text-white hover:bg-[#E11D48] shadow-[0_4px_12px_rgba(244,63,94,0.3)]"
+                    : "bg-[#F1F5F9] text-[#CBD5E1] cursor-not-allowed"
+                }`}>
+                {clearDataClearing ? "清除中..." : "确认删除全部数据"}
+              </motion.button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Attachment Preview Dialog */}
+      <Dialog open={!!previewAttachment} onOpenChange={() => setPreviewAttachment(null)}>
+        <DialogContent className="max-w-[800px] w-[90vw] max-h-[85vh] p-0 bg-white rounded-2xl shadow-[0_24px_48px_rgba(0,0,0,0.15)] border-0 gap-0 overflow-hidden">
+          {previewAttachment && (
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0]">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText className="w-4 h-4 text-[#64748B] shrink-0" />
+                  <span className="text-sm font-semibold text-[#1E293B] truncate">{previewAttachment.name}</span>
+                </div>
+                <button onClick={() => setPreviewAttachment(null)}
+                  className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#1E293B] hover:bg-[#F1F5F9] transition-colors cursor-pointer shrink-0">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto p-6 bg-[#F8FAFC] flex items-center justify-center min-h-[300px]">
+                {previewAttachment.dataUrl.startsWith("data:image/") ? (
+                  <img src={previewAttachment.dataUrl} alt={previewAttachment.name}
+                    className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-sm" />
+                ) : previewAttachment.dataUrl.startsWith("data:application/pdf") ? (
+                  <iframe src={previewAttachment.dataUrl}
+                    className="w-full h-[60vh] rounded-lg border border-[#E2E8F0]" title={previewAttachment.name} />
+                ) : (
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <FileText className="w-16 h-16 text-[#CBD5E1]" />
+                    <p className="text-sm text-[#64748B]">无法预览此文件类型</p>
+                    <a href={previewAttachment.dataUrl} download={previewAttachment.name}
+                      className="text-sm font-medium text-[#3B82F6] hover:underline cursor-pointer">
+                      点击下载
+                    </a>
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end gap-3 px-6 py-4 border-t border-[#E2E8F0]">
+                <a href={previewAttachment.dataUrl} download={previewAttachment.name}
+                  className="px-4 py-2 bg-[#3B82F6] text-white text-sm font-medium rounded-lg hover:bg-[#2563EB] transition-colors cursor-pointer">
+                  下载文件
+                </a>
+                <button onClick={() => setPreviewAttachment(null)}
+                  className="px-4 py-2 bg-[#F1F5F9] text-[#334155] text-sm font-medium rounded-lg hover:bg-[#E2E8F0] transition-colors cursor-pointer">
+                  关闭
+                </button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Manage Categories Dialog */}
       <Dialog open={showCategoryManageDialog} onOpenChange={setShowCategoryManageDialog}>
         <DialogContent className="max-w-[500px] w-[90vw] max-h-[75vh] overflow-hidden p-6 bg-white rounded-2xl shadow-[0_16px_32px_rgba(0,0,0,0.15)] border-0 gap-0 flex flex-col">
@@ -933,6 +1060,30 @@ function UploadIcon({ className }: { className?: string }) {
   return (
     <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
+    </svg>
+  );
+}
+
+function UndoIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+    </svg>
+  );
+}
+
+function EyeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function ReplaceIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="17 1 21 5 17 9" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><polyline points="7 23 3 19 7 15" /><path d="M21 13v2a4 4 0 0 1-4 4H3" />
     </svg>
   );
 }
