@@ -377,6 +377,50 @@ export function useTaskManager() {
     return result;
   }, []);
 
+  const restoreTask = useCallback(async (taskId: string): Promise<Task | null> => {
+    let result: Task | null = null;
+    const entryId = generateId();
+    const now = new Date().toISOString();
+
+    setTasks((prev) =>
+      prev.map((task) => {
+        if (task.id !== taskId) return task;
+        const restored = {
+          ...task,
+          status: "active" as const,
+          history: [...task.history, {
+            id: entryId,
+            taskId,
+            timestamp: now,
+            progress: task.progress,
+            note: "项目已恢复",
+          }],
+        };
+        restored.status = getStatus(restored);
+        result = restored;
+        return restored;
+      })
+    );
+
+    const task = tasks.find((t) => t.id === taskId);
+    const restoredStatus = getStatus({ ...task!, status: "active" });
+
+    await supabase.from("tasks").update({
+      status: restoredStatus,
+      updated_at: now,
+    }).eq("id", taskId);
+
+    await supabase.from("progress_entries").insert({
+      id: entryId,
+      task_id: taskId,
+      timestamp: now,
+      progress: task?.progress ?? 0,
+      note: "项目已恢复",
+    });
+
+    return result;
+  }, [tasks]);
+
   const addCustomCategory = useCallback(async (name: string, color: string): Promise<CustomCategory> => {
     const newCat: CustomCategory = {
       id: "custom-" + generateId(),
@@ -473,6 +517,34 @@ export function useTaskManager() {
     await supabase.from("attachments").delete().eq("id", attachmentId);
   }, []);
 
+  const updateAttachment = useCallback(async (taskId: string, attachmentId: string, file: File) => {
+    const dataUrl = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsDataURL(file);
+    });
+
+    setTasks((prev) =>
+      prev.map((task) => {
+        if (task.id !== taskId) return task;
+        return {
+          ...task,
+          attachments: (task.attachments || []).map((a) =>
+            a.id === attachmentId
+              ? { ...a, name: file.name, size: file.size, dataUrl }
+              : a
+          ),
+        };
+      })
+    );
+
+    await supabase.from("attachments").update({
+      name: file.name,
+      size: file.size,
+      data_url: dataUrl,
+    }).eq("id", attachmentId);
+  }, []);
+
   const exportData = useCallback((): string => {
     const data = {
       tasks,
@@ -545,8 +617,6 @@ export function useTaskManager() {
   }, [fetchAllData]);
 
   const clearAllData = useCallback(async () => {
-    if (!confirm("确定要清除所有数据吗？此操作不可撤销！")) return;
-
     await supabase.from("attachments").delete().neq("id", "__none__");
     await supabase.from("progress_entries").delete().neq("id", "__none__");
     await supabase.from("tasks").delete().neq("id", "__none__");
@@ -570,11 +640,13 @@ export function useTaskManager() {
     deleteTask,
     toggleComplete,
     terminateTask,
+    restoreTask,
     addCustomCategory,
     updateCategory,
     deleteCategory,
     addAttachment,
     removeAttachment,
+    updateAttachment,
     exportData,
     importData,
     clearAllData,
