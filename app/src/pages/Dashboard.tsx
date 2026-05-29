@@ -347,12 +347,11 @@ export default function Dashboard() {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const text = ev.target?.result as string;
-      const ok = importData(text);
+      const ok = await importData(text);
       if (ok) {
-        toast.success("数据导入成功！页面将自动刷新。");
-        setTimeout(() => window.location.reload(), 1000);
+        toast.success("数据导入成功！数据已同步到云端。");
       } else {
         toast.error("导入失败：文件格式不正确");
       }
