@@ -159,7 +159,7 @@ function DeleteModal({ task, open, onClose, onConfirm }: {
 }
 
 /* ─────────────── Sortable Task Card Wrapper ─────────────── */
-function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit, onDelete, onHistory, onDeadlineClick }: {
+function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit, onDelete, onHistory, onDeadlineClick, onNameClick, expandedTaskId }: {
   task: Task;
   index: number;
   allCategories: { id: string; name: string; color: string }[];
@@ -168,6 +168,8 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
   onDelete: (task: Task) => void;
   onHistory: (task: Task) => void;
   onDeadlineClick: (task: Task) => void;
+  onNameClick: (task: Task) => void;
+  expandedTaskId: string | null;
 }) {
   const navigate = useNavigate();
   const {
@@ -190,6 +192,7 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
   const borderColor = getBorderColor(task);
   const completed = task.status === "completed";
   const terminated = task.status === "terminated";
+  const isExpanded = expandedTaskId === task.id;
 
   return (
     <div ref={setNodeRef} style={style}>
@@ -219,10 +222,12 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
                 )}
               </div>
             </button>
-            <span className={`flex-1 text-sm font-semibold truncate ${completed || terminated ? "line-through text-[#94A3B8] opacity-70" : "text-[#334155]"}`}>
+            <button onClick={() => onNameClick(task)}
+              className={`flex-1 text-left truncate ${completed || terminated ? "line-through text-[#94A3B8] opacity-70" : "text-[#334155] hover:text-[#14B8A6]"} transition-colors duration-150 cursor-pointer`}
+              title="点击查看更新记录">
               <span className="font-mono text-xs text-[#94A3B8] mr-1.5">#{index + 1}</span>
-              {task.name}
-            </span>
+              <span className="text-sm font-semibold">{task.name}</span>
+            </button>
             {(() => {
               const catInfo = allCategories.find((c) => c.id === task.category);
               if (!catInfo) return null;
@@ -267,18 +272,6 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
               </div>
               <span className="text-xs font-semibold text-[#475569] tabular-nums">{task.progress}%</span>
             </div>
-            {task.history.length > 0 && (
-              <div className="flex flex-col gap-1 mt-2">
-                {[...task.history].reverse().slice(0, 3).map((entry) => (
-                  <div key={entry.id} className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
-                    <History className="w-3.5 h-3.5 shrink-0" />
-                    <span className="font-mono text-[#94A3B8] shrink-0">{formatDateTime(entry.timestamp)}</span>
-                    <span className="text-[#CBD5E1] shrink-0">—</span>
-                    <span className="text-[#64748B] truncate">{entry.note}</span>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <button onClick={() => onEdit(task)} className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#14B8A6] hover:bg-[#F0FDFA] transition-all duration-150 cursor-pointer" title="编辑">
@@ -292,6 +285,57 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
             </button>
           </div>
         </div>
+
+        {/* Expandable History Panel - slides out when task name is clicked */}
+        <AnimatePresence>
+          {isExpanded && task.history.length > 0 && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <div className="mt-3 pt-3 border-t border-[#E2E8F0]">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <History className="w-3.5 h-3.5 text-[#64748B]" />
+                  <span className="text-xs font-semibold text-[#64748B]">更新记录</span>
+                  <span className="text-[0.625rem] px-1.5 py-0.5 rounded-full bg-[#F0F9FF] text-[#3B82F6] tabular-nums">{task.history.length} 条</span>
+                </div>
+                <ScrollArea className="max-h-[240px]">
+                  <div className="flex flex-col gap-1.5 pr-2">
+                    {[...task.history].reverse().map((entry) => (
+                      <div key={entry.id} className="flex items-center gap-2.5 text-xs py-2 px-3 rounded-lg bg-[#F8FAFC] hover:bg-[#F1F5F9] transition-colors border border-[#F1F5F9]">
+                        <span className="font-mono text-[#94A3B8] shrink-0 min-w-[130px] tabular-nums">{formatDateTime(entry.timestamp)}</span>
+                        <div className="w-16 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden shrink-0">
+                          <div className="h-full bg-[#14B8A6] rounded-full" style={{ width: `${entry.progress}%` }} />
+                        </div>
+                        <span className="font-mono text-[#475569] font-semibold shrink-0 w-8 tabular-nums">{entry.progress}%</span>
+                        <span className="text-[#64748B] truncate flex-1">{entry.note || "—"}</span>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </motion.div>
+          )}
+          {isExpanded && task.history.length === 0 && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <div className="mt-3 pt-3 border-t border-[#E2E8F0]">
+                <div className="flex items-center gap-1.5">
+                  <History className="w-3.5 h-3.5 text-[#94A3B8]" />
+                  <span className="text-xs text-[#94A3B8]">暂无更新记录</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </div>
   );
@@ -357,6 +401,9 @@ export default function Dashboard() {
   const [inlineDeadlineTask, setInlineDeadlineTask] = useState<Task | null>(null);
   const [inlineDeadlineValue, setInlineDeadlineValue] = useState("");
 
+  // Expandable history panel
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+
   const openInlineDeadline = useCallback((task: Task) => {
     setInlineDeadlineTask(task);
     setInlineDeadlineValue(task.deadline);
@@ -370,6 +417,10 @@ export default function Dashboard() {
     setInlineDeadlineTask(null);
     setInlineDeadlineValue("");
   }, [inlineDeadlineTask, inlineDeadlineValue, updateTask]);
+
+  const handleNameClick = useCallback((task: Task) => {
+    setExpandedTaskId((prev) => prev === task.id ? null : task.id);
+  }, []);
 
   const handleRestore = useCallback((task: Task) => {
     restoreTask(task.id);
@@ -808,6 +859,8 @@ export default function Dashboard() {
                           onDelete={handleDelete}
                           onHistory={(t) => navigate(`/history?taskId=${t.id}`)}
                           onDeadlineClick={openInlineDeadline}
+                          onNameClick={handleNameClick}
+                          expandedTaskId={expandedTaskId}
                         />
                       );
                     })
