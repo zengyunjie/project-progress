@@ -66,7 +66,7 @@ function TaskCard({ task, index }: { task: Task; index: number }) {
             initial={{ width: 0 }} animate={{ width: `${task.progress}%` }}
             transition={{ duration: 0.6, delay: index * 0.06 + 0.2, ease: "easeOut" }} />
         </div>
-        <span className="text-xs font-medium text-[#475569]">{task.progress}%</span>
+        <span className="text-xs font-medium text-[#475569] tabular-nums">{task.progress}%</span>
       </div>
       <div className="flex items-center gap-1.5 mb-1.5">
         <Clock className="w-3 h-3 text-[#94A3B8]" />
@@ -119,7 +119,7 @@ function BoardColumn({
       style={{ borderTopWidth: 3, borderTopColor: categoryColor }}>
       <div className="px-4 py-3.5 flex items-center justify-between" style={{ backgroundColor: headerBg }}>
         <h3 className="text-sm font-semibold text-[#1E293B] truncate">{categoryName}</h3>
-        <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full text-xs font-bold text-white"
+        <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full text-xs font-bold text-white tabular-nums"
           style={{ backgroundColor: categoryColor }}>{tasks.length}</span>
       </div>
       <div className="flex-1 p-3 flex flex-col gap-2.5 min-h-[120px]">
@@ -168,7 +168,7 @@ function StatCard({ label, value, color, bg, delay }: { label: string; value: nu
         </svg>
       </div>
       <div>
-        <p className="text-xl font-bold text-[#1E293B] leading-tight">{value}</p>
+        <p className="text-xl font-bold text-[#1E293B] leading-tight tabular-nums">{value}</p>
         <p className="text-xs text-[#94A3B8]">{label}</p>
       </div>
     </motion.div>

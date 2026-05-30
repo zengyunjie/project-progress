@@ -22,6 +22,12 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
 }
 
+function formatDateTimeShort(isoStr: string): string {
+  const d = new Date(isoStr);
+  return d.toLocaleDateString("zh-CN", { month: "short", day: "numeric" }) +
+    " " + d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+}
+
 function getStatusBadge(task: Task): { text: string; bg: string; textColor: string; dot: string } {
   if (task.status === "terminated") return { text: "已终止", bg: "#F1F5F9", textColor: "#94A3B8", dot: "#94A3B8" };
   if (task.status === "completed") return { text: "已完成", bg: "#ECFDF5", textColor: "#059669", dot: "#10B981" };
@@ -48,7 +54,7 @@ function OverviewCard({ icon: Icon, label, value, color, bg, delay }: {
         <Icon className="w-5 h-5" style={{ color }} />
       </div>
       <div>
-        <p className="text-[1.375rem] font-bold text-[#1E293B] leading-tight">{value}</p>
+        <p className="text-[1.375rem] font-bold text-[#1E293B] leading-tight tabular-nums">{value}</p>
         <p className="text-xs text-[#94A3B8]">{label}</p>
       </div>
     </motion.div>
@@ -75,6 +81,7 @@ function CategoryCard({
 
   // 最多展示最近 6 个项目，超出折叠
   const maxShow = 6;
+  const [showAll, setShowAll] = useMemo(() => [false, () => {}], []);
   const visibleTasks = activeTasks.slice(0, maxShow);
   const hiddenCount = activeTasks.length - maxShow;
 
@@ -94,7 +101,7 @@ function CategoryCard({
           <h2 className="text-base font-bold text-[#1E293B] truncate">{category.name}</h2>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1">
             <span className="text-xs text-[#94A3B8]">
-              <span className="font-semibold text-[#475569]">{tasks.length}</span> 个项目
+              <span className="font-semibold text-[#475569] tabular-nums">{tasks.length}</span> 个项目
             </span>
             {completedCount > 0 && (
               <span className="flex items-center gap-1 text-xs text-[#059669]">
@@ -116,7 +123,7 @@ function CategoryCard({
               <circle cx="18" cy="18" r="14" fill="none" stroke={category.color} strokeWidth="3"
                 strokeDasharray={`${(avgProgress / 100) * 87.96} 87.96`} strokeLinecap="round" />
             </svg>
-            <span className="text-[0.625rem] font-bold -mt-5" style={{ color: category.color }}>{avgProgress}%</span>
+            <span className="text-[0.625rem] font-bold -mt-5 tabular-nums" style={{ color: category.color }}>{avgProgress}%</span>
           </div>
         )}
       </div>
@@ -133,7 +140,7 @@ function CategoryCard({
           </div>
         ) : (
           <>
-            {visibleTasks.map((task) => (
+            {visibleTasks.map((task, idx) => (
               <TaskCardItem key={task.id} task={task} categoryColor={category.color} />
             ))}
             {hiddenCount > 0 && (
@@ -202,7 +209,7 @@ function TaskCardItem({ task, categoryColor }: { task: Task; categoryColor: stri
               backgroundColor: isTerminated ? "#94A3B8" : isCompleted ? "#10B981" : task.status === "overdue" ? "#F43F5E" : categoryColor,
             }} />
         </div>
-        <span className="text-[0.625rem] font-mono font-semibold w-7 text-right text-[#475569]">{task.progress}%</span>
+        <span className="text-[0.625rem] font-mono font-semibold w-7 text-right text-[#475569] tabular-nums">{task.progress}%</span>
       </div>
 
       {/* Latest update (mini) */}

@@ -25,6 +25,7 @@ export interface Task {
   status: "active" | "completed" | "overdue" | "terminated";
   history: ProgressEntry[];
   attachments?: Attachment[];
+  sort_order: number;
 }
 
 export interface CustomCategory {

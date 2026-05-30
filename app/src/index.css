@@ -51,6 +51,9 @@
     --blue-500: #3B82F6;
     --blue-600: #2563EB;
     --blue-700: #1D4ED8;
+
+    /* Programmer number font */
+    --font-mono-num: 'JetBrains Mono', 'Fira Code', 'SF Mono', ui-monospace, monospace;
   }
 
   * {
@@ -67,5 +70,12 @@
 
   html {
     scroll-behavior: smooth;
+  }
+
+  /* Global tabular-nums utility for all numeric text */
+  .tabular-nums,
+  .font-mono {
+    font-family: var(--font-mono-num);
+    font-variant-numeric: tabular-nums;
   }
 }

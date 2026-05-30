@@ -228,7 +228,7 @@ export default function HistoryPage() {
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: item.d }}
                 className="pl-4 border-l-2" style={{ borderLeftColor: item.c }}>
-                <div className="text-[1.5rem] font-bold text-[#1E293B] leading-tight flex items-center gap-1">
+                <div className="text-[1.5rem] font-bold text-[#1E293B] leading-tight flex items-center gap-1 tabular-nums">
                   {item.icon && <TrendingUp className="w-4 h-4 text-[#F59E0B]" />}{item.v}
                 </div>
                 <div className="text-[0.75rem] text-[#94A3B8] mt-0.5">{item.l}</div>
@@ -297,7 +297,7 @@ export default function HistoryPage() {
                                 style={{ backgroundColor: statusBgColors[entry.task.status], color: statusTextColors[entry.task.status] }}>{statusLabels[entry.task.status]}</span>
                             </div>
                             <div className="flex flex-wrap items-center gap-4 mb-2">
-                              <div className="flex items-center gap-1.5 font-mono text-[0.8125rem]">
+                              <div className="flex items-center gap-1.5 font-mono text-[0.8125rem] tabular-nums">
                                 {entry.previousProgress !== null ? (<>
                                   <span className="text-[#94A3B8]">{entry.previousProgress}%</span>
                                   <span className="text-[#CBD5E1]">→</span>
@@ -358,8 +358,8 @@ export default function HistoryPage() {
               </div>
               <div className="h-[1px] bg-[#E2E8F0] my-4" />
               <div className="mb-5">
-                <p className="text-[0.8125rem] text-[#64748B] mb-2">进度更新</p>
-                <div className="flex items-center gap-2 mb-3">
+                  <p className="text-[0.8125rem] text-[#64748B] mb-2">进度更新</p>
+                <div className="flex items-center gap-2 mb-3 tabular-nums">
                   {detailEntry.previousProgress !== null ? (<>
                     <span className="text-[1.5rem] font-bold text-[#1E293B]">{detailEntry.previousProgress}% → {detailEntry.progress}%</span>
                     {detailEntry.progress > detailEntry.previousProgress && (

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { motion } from "framer-motion";
-import { CheckCircle2, Plus, LayoutDashboard, History, Grid3X3, Menu, X, Download, Upload } from "lucide-react";
+import { CheckCircle2, Plus, LayoutDashboard, History, Grid3X3, Menu, X, Download, Upload, Paperclip } from "lucide-react";
 
 interface NavbarProps {
   dailyDigestEnabled: boolean;
@@ -19,6 +19,7 @@ export default function Navbar({ dailyDigestEnabled, onToggleDigest, onNewTask, 
   const isDashboard = location.pathname === "/" || location.pathname === "/index.html";
   const isHistory = location.pathname === "/history";
   const isCategories = location.pathname === "/categories";
+  const isAttachments = location.pathname === "/attachments";
 
   return (
     <motion.nav
@@ -38,7 +39,7 @@ export default function Navbar({ dailyDigestEnabled, onToggleDigest, onNewTask, 
           <div className="w-5 h-5 rounded-full bg-[#14B8A6] flex items-center justify-center">
             <CheckCircle2 className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="text-[#1E293B] font-bold text-lg tracking-tight">项目进度管理</span>
+          <span className="text-[#1E293B] font-bold text-[1.875rem] tracking-tight leading-tight">项目进度管理</span>
         </motion.button>
 
         {/* Desktop Nav Links */}
@@ -57,6 +58,11 @@ export default function Navbar({ dailyDigestEnabled, onToggleDigest, onNewTask, 
             style={{ color: isCategories ? "#0D9488" : "#64748B", fontWeight: isCategories ? 600 : 500 }}>
             分类总览
             {isCategories && <motion.div layoutId="nav-underline" className="absolute -bottom-[18px] left-0 right-0 h-0.5 bg-[#14B8A6]" transition={{ duration: 0.25 }} />}
+          </button>
+          <button onClick={() => navigate("/attachments")} className="relative text-sm font-medium transition-colors duration-150 cursor-pointer"
+            style={{ color: isAttachments ? "#0D9488" : "#64748B", fontWeight: isAttachments ? 600 : 500 }}>
+            附件清单
+            {isAttachments && <motion.div layoutId="nav-underline" className="absolute -bottom-[18px] left-0 right-0 h-0.5 bg-[#14B8A6]" transition={{ duration: 0.25 }} />}
           </button>
         </div>
 
@@ -114,6 +120,10 @@ export default function Navbar({ dailyDigestEnabled, onToggleDigest, onNewTask, 
           <button onClick={() => { navigate("/categories"); setMobileMenuOpen(false); }} className="flex items-center gap-2 text-sm font-medium py-2 cursor-pointer"
             style={{ color: isCategories ? "#0D9488" : "#64748B" }}>
             <Grid3X3 className="w-4 h-4" /> 分类总览
+          </button>
+          <button onClick={() => { navigate("/attachments"); setMobileMenuOpen(false); }} className="flex items-center gap-2 text-sm font-medium py-2 cursor-pointer"
+            style={{ color: isAttachments ? "#0D9488" : "#64748B" }}>
+            <Paperclip className="w-4 h-4" /> 附件清单
           </button>
           <div className="border-t border-[#E2E8F0] pt-3 flex flex-col gap-3">
             {onExport && (
