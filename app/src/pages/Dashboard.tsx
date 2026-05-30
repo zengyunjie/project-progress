@@ -159,7 +159,7 @@ function DeleteModal({ task, open, onClose, onConfirm }: {
 }
 
 /* ─────────────── Sortable Task Card Wrapper ─────────────── */
-function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit, onDelete, onHistory, onDeadlineClick, onNameClick, expandedTaskId }: {
+function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit, onDelete, onHistory, onDeadlineClick, onNameClick }: {
   task: Task;
   index: number;
   allCategories: { id: string; name: string; color: string }[];
@@ -169,7 +169,6 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
   onHistory: (task: Task) => void;
   onDeadlineClick: (task: Task) => void;
   onNameClick: (task: Task) => void;
-  expandedTaskId: string | null;
 }) {
   const navigate = useNavigate();
   const {
@@ -192,7 +191,6 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
   const borderColor = getBorderColor(task);
   const completed = task.status === "completed";
   const terminated = task.status === "terminated";
-  const isExpanded = expandedTaskId === task.id;
 
   return (
     <div ref={setNodeRef} style={style}>
@@ -222,67 +220,11 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
                 )}
               </div>
             </button>
-            <div className="relative flex-1 min-w-0">
-              <button onClick={() => onNameClick(task)}
-                className={`w-full text-left truncate flex items-center gap-1.5 ${completed || terminated ? "line-through text-[#94A3B8] opacity-70" : "text-[#334155] hover:text-[#14B8A6]"} transition-colors duration-150 cursor-pointer`}
-                title="点击查看更新记录">
-                <span className="font-mono text-xs text-[#94A3B8]">#{index + 1}</span>
-                <span className="text-sm font-semibold truncate">{task.name}</span>
-              </button>
-
-              {/* Popover History Panel - appears beside task name */}
-              <AnimatePresence>
-                {isExpanded && (
-                  <>
-                    {/* Click-away backdrop */}
-                    <div className="fixed inset-0 z-[998]" onClick={() => onNameClick(task)} />
-                    <motion.div
-                      initial={{ opacity: 0, y: -4, scale: 0.97 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -4, scale: 0.97 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      className="absolute top-full left-0 mt-2 z-[999] w-[420px] max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-[#E2E8F0] overflow-hidden"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {/* Header */}
-                      <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-[#F0FDFA] to-[#EFF6FF] border-b border-[#E2E8F0]">
-                        <div className="flex items-center gap-2">
-                          <History className="w-4 h-4 text-[#14B8A6]" />
-                          <span className="text-sm font-semibold text-[#334155]">更新记录</span>
-                          <span className="text-[0.625rem] px-1.5 py-0.5 rounded-full bg-[#14B8A6]/10 text-[#14B8A6] font-semibold tabular-nums">{task.history.length} 条</span>
-                        </div>
-                        <button onClick={() => onNameClick(task)}
-                          className="w-6 h-6 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#475569] hover:bg-white/60 transition-all cursor-pointer">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      {/* Content */}
-                      {task.history.length > 0 ? (
-                        <ScrollArea className="max-h-[280px]">
-                          <div className="flex flex-col gap-0.5 p-2">
-                            {[...task.history].reverse().map((entry) => (
-                              <div key={entry.id} className="flex items-center gap-2.5 text-xs py-2.5 px-3 rounded-lg hover:bg-[#F8FAFC] transition-colors">
-                                <span className="font-mono text-[#94A3B8] shrink-0 min-w-[130px] tabular-nums">{formatDateTime(entry.timestamp)}</span>
-                                <div className="w-14 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden shrink-0">
-                                  <div className="h-full bg-[#14B8A6] rounded-full" style={{ width: `${entry.progress}%` }} />
-                                </div>
-                                <span className="font-mono text-[#475569] font-semibold shrink-0 w-8 tabular-nums">{entry.progress}%</span>
-                                <span className="text-[#64748B] truncate flex-1">{entry.note || "—"}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-8 text-[#94A3B8]">
-                          <History className="w-8 h-8 mb-2 opacity-40" />
-                          <span className="text-xs">暂无更新记录</span>
-                        </div>
-                      )}
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
+            <button onClick={() => onNameClick(task)}
+              className={`flex-1 text-sm font-semibold truncate text-left cursor-pointer ${completed || terminated ? "line-through text-[#94A3B8] opacity-70" : "text-[#334155] hover:text-[#14B8A6] transition-colors"}`}>
+              <span className="font-mono text-xs text-[#94A3B8] mr-1.5">#{index + 1}</span>
+              {task.name}
+            </button>
             {(() => {
               const catInfo = allCategories.find((c) => c.id === task.category);
               if (!catInfo) return null;
@@ -327,6 +269,18 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
               </div>
               <span className="text-xs font-semibold text-[#475569] tabular-nums">{task.progress}%</span>
             </div>
+            {task.history.length > 0 && (
+              <div className="flex flex-col gap-1 mt-2">
+                {[...task.history].reverse().slice(0, 3).map((entry) => (
+                  <div key={entry.id} className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
+                    <History className="w-3.5 h-3.5 shrink-0" />
+                    <span className="font-mono text-[#94A3B8] shrink-0">{formatDateTime(entry.timestamp)}</span>
+                    <span className="text-[#CBD5E1] shrink-0">—</span>
+                    <span className="text-[#64748B] truncate">{entry.note}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <button onClick={() => onEdit(task)} className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#14B8A6] hover:bg-[#F0FDFA] transition-all duration-150 cursor-pointer" title="编辑">
@@ -340,7 +294,6 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
             </button>
           </div>
         </div>
-
       </motion.div>
     </div>
   );
@@ -406,8 +359,11 @@ export default function Dashboard() {
   const [inlineDeadlineTask, setInlineDeadlineTask] = useState<Task | null>(null);
   const [inlineDeadlineValue, setInlineDeadlineValue] = useState("");
 
-  // Expandable history panel
-  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  // Right-side drawer for task history
+  const [drawerTask, setDrawerTask] = useState<Task | null>(null);
+  const handleNameClick = useCallback((task: Task) => {
+    setDrawerTask((prev) => prev?.id === task.id ? null : task);
+  }, []);
 
   const openInlineDeadline = useCallback((task: Task) => {
     setInlineDeadlineTask(task);
@@ -422,10 +378,6 @@ export default function Dashboard() {
     setInlineDeadlineTask(null);
     setInlineDeadlineValue("");
   }, [inlineDeadlineTask, inlineDeadlineValue, updateTask]);
-
-  const handleNameClick = useCallback((task: Task) => {
-    setExpandedTaskId((prev) => prev === task.id ? null : task.id);
-  }, []);
 
   const handleRestore = useCallback((task: Task) => {
     restoreTask(task.id);
@@ -865,7 +817,6 @@ export default function Dashboard() {
                           onHistory={(t) => navigate(`/history?taskId=${t.id}`)}
                           onDeadlineClick={openInlineDeadline}
                           onNameClick={handleNameClick}
-                          expandedTaskId={expandedTaskId}
                         />
                       );
                     })
@@ -1291,6 +1242,117 @@ export default function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Right-side History Drawer */}
+      <AnimatePresence>
+        {drawerTask && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="drawer-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 bg-black/20 z-[900]"
+              onClick={() => setDrawerTask(null)}
+            />
+            {/* Drawer Panel */}
+            <motion.div
+              key="drawer-panel"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+              className="fixed top-0 right-0 h-full w-[420px] max-w-[95vw] bg-white shadow-[-8px_0_30px_rgba(0,0,0,0.12)] z-[950] flex flex-col overflow-hidden"
+            >
+              {/* Header */}
+              <div className="px-5 py-4 border-b border-[#E2E8F0] bg-[#F0FDFA] shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-bold text-[#1E293B] truncate">{drawerTask.name}</h3>
+                    <p className="text-xs text-[#64748B] mt-0.5">
+                      {drawerTask.history.length} 条更新记录
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setDrawerTask(null)}
+                    className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#1E293B] hover:bg-[#E2E8F0] transition-colors cursor-pointer shrink-0 ml-2"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                {/* Progress summary */}
+                <div className="flex items-center gap-2 mt-3">
+                  <div className="flex-1 h-2 bg-[#E2E8F0] rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${drawerTask.progress}%` }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      className="h-full rounded-full"
+                      style={{ backgroundColor: drawerTask.status === "completed" ? "#10B981" : drawerTask.status === "overdue" ? "#F43F5E" : "#14B8A6" }}
+                    />
+                  </div>
+                  <span className="text-sm font-bold text-[#475569] tabular-nums shrink-0">{drawerTask.progress}%</span>
+                </div>
+              </div>
+
+              {/* History List */}
+              <ScrollArea className="flex-1">
+                <div className="px-5 py-4">
+                  {drawerTask.history.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <History className="w-10 h-10 text-[#CBD5E1] mb-3" />
+                      <p className="text-sm text-[#94A3B8]">暂无更新记录</p>
+                      <p className="text-xs text-[#CBD5E1] mt-1">编辑任务时添加备注即可创建记录</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      {[...drawerTask.history].reverse().map((entry, idx) => (
+                        <motion.div
+                          key={entry.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.25, delay: Math.min(idx * 0.04, 0.3) }}
+                          className="bg-[#F8FAFC] rounded-xl p-3.5 border border-[#E2E8F0]"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-mono text-[#94A3B8]">{formatDateTime(entry.timestamp)}</span>
+                            <span className="text-sm font-bold text-[#475569] tabular-nums">{entry.progress}%</span>
+                          </div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex-1 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
+                              <div className="h-full rounded-full bg-[#14B8A6] transition-all duration-300" style={{ width: `${entry.progress}%` }} />
+                            </div>
+                          </div>
+                          {entry.note && (
+                            <p className="text-xs text-[#64748B] leading-relaxed">{entry.note}</p>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+
+              {/* Footer */}
+              <div className="px-5 py-3 border-t border-[#E2E8F0] bg-[#F8FAFC] shrink-0">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[#94A3B8]">
+                    创建于 {formatDateTime(drawerTask.createdDate)}
+                  </span>
+                  <button
+                    onClick={() => { navigate(`/history?taskId=${drawerTask.id}`); setDrawerTask(null); }}
+                    className="text-xs font-medium text-[#14B8A6] hover:text-[#0D9488] transition-colors cursor-pointer"
+                  >
+                    查看完整记录 →
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </Layout>
   );
 }

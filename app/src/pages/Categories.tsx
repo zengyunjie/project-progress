@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import {
-  Clock, CheckCircle2, History, ChevronRight,
+  Clock, CheckCircle2, ChevronRight,
   AlertTriangle, TrendingUp, Inbox, Plus, GripHorizontal,
 } from "lucide-react";
 import Layout from "@/components/Layout";
@@ -170,7 +170,6 @@ function CategoryCard({
 function TaskCardItem({ task, categoryColor }: { task: Task; categoryColor: string }) {
   const navigate = useNavigate();
   const badge = getStatusBadge(task);
-  const latestEntry = task.history.length > 0 ? task.history[task.history.length - 1] : null;
   const isCompleted = task.status === "completed";
   const isTerminated = task.status === "terminated";
 
@@ -211,15 +210,6 @@ function TaskCardItem({ task, categoryColor }: { task: Task; categoryColor: stri
         </div>
         <span className="text-[0.625rem] font-mono font-semibold w-7 text-right text-[#475569] tabular-nums">{task.progress}%</span>
       </div>
-
-      {/* Latest update (mini) */}
-      {latestEntry && (
-        <div className="hidden lg:flex items-center gap-1 shrink-0 max-w-[140px] min-w-0"
-          title={latestEntry.note}>
-          <History className="w-2.5 h-2.5 text-[#CBD5E1] shrink-0" />
-          <span className="text-[0.625rem] text-[#94A3B8] truncate">{latestEntry.note}</span>
-        </div>
-      )}
 
       <ChevronRight className="w-3 h-3 text-[#CBD5E1] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
     </motion.div>
