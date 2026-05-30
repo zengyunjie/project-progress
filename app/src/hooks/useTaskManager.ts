@@ -430,8 +430,20 @@ export function useTaskManager() {
       note: "项目已恢复",
     });
 
-    return result;
   }, [tasks]);
+
+  const deleteHistoryEntry = useCallback(async (taskId: string, entryId: string) => {
+    // Optimistic: remove entry from local state
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        return { ...t, history: t.history.filter((h) => h.id !== entryId) };
+      })
+    );
+
+    // Delete from Supabase
+    await supabase.from("progress_entries").delete().eq("id", entryId).eq("task_id", taskId);
+  }, []);
 
   const addCustomCategory = useCallback(async (name: string, color: string): Promise<CustomCategory> => {
     const newCat: CustomCategory = {
@@ -684,6 +696,7 @@ export function useTaskManager() {
     importData,
     clearAllData,
     reorderTasks,
+    deleteHistoryEntry,
     refreshData: fetchAllData,
   };
 }

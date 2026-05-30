@@ -29,6 +29,11 @@ import { useTaskManager } from "@/hooks/useTaskManager";
 import { useDailyDigest } from "@/hooks/useDailyDigest";
 import Layout from "@/components/Layout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogAction, AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -305,7 +310,7 @@ export default function Dashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     tasks, addTask, updateTask, deleteTask, toggleComplete,
-    terminateTask, restoreTask, allCategories, addCustomCategory,
+    terminateTask, restoreTask, deleteHistoryEntry, allCategories, addCustomCategory,
     updateCategory, deleteCategory,
     addAttachment, removeAttachment, updateAttachment, exportData, importData, clearAllData,
     reorderTasks, loading, error, refreshData,
@@ -364,6 +369,22 @@ export default function Dashboard() {
   const handleNameClick = useCallback((task: Task) => {
     setDrawerTask((prev) => prev?.id === task.id ? null : task);
   }, []);
+
+  // Delete history entry confirmation
+  const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
+  const [deleteEntryTaskId, setDeleteEntryTaskId] = useState<string>("");
+  const confirmDeleteEntry = useCallback(async () => {
+    if (!deleteEntryId || !deleteEntryTaskId) return;
+    await deleteHistoryEntry(deleteEntryTaskId, deleteEntryId);
+    setDeleteEntryId(null);
+    setDeleteEntryTaskId("");
+    // Refresh drawer task with updated history
+    setTasks((prev) => {
+      const t = prev.find((t) => t.id === deleteEntryTaskId);
+      if (t) setDrawerTask({ ...t });
+      return prev;
+    });
+  }, [deleteEntryId, deleteEntryTaskId]);
 
   const openInlineDeadline = useCallback((task: Task) => {
     setInlineDeadlineTask(task);
@@ -1282,19 +1303,6 @@ export default function Dashboard() {
                     <X className="w-4 h-4" />
                   </button>
                 </div>
-                {/* Progress summary */}
-                <div className="flex items-center gap-2 mt-3">
-                  <div className="flex-1 h-2 bg-[#E2E8F0] rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${drawerTask.progress}%` }}
-                      transition={{ duration: 0.5, ease: "easeOut" }}
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: drawerTask.status === "completed" ? "#10B981" : drawerTask.status === "overdue" ? "#F43F5E" : "#14B8A6" }}
-                    />
-                  </div>
-                  <span className="text-sm font-bold text-[#475569] tabular-nums shrink-0">{drawerTask.progress}%</span>
-                </div>
               </div>
 
               {/* History List */}
@@ -1320,14 +1328,46 @@ export default function Dashboard() {
                             <span className="text-xs font-mono text-[#94A3B8]">{formatDateTime(entry.timestamp)}</span>
                             <span className="text-sm font-bold text-[#475569] tabular-nums">{entry.progress}%</span>
                           </div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="flex-1 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
-                              <div className="h-full rounded-full bg-[#14B8A6] transition-all duration-300" style={{ width: `${entry.progress}%` }} />
-                            </div>
-                          </div>
                           {entry.note && (
                             <p className="text-xs text-[#64748B] leading-relaxed">{entry.note}</p>
                           )}
+                          {/* Delete button with confirmation */}
+                          <div className="flex justify-end mt-2">
+                            <AlertDialog open={deleteEntryId === entry.id} onOpenChange={(open) => !open && setDeleteEntryId(null)}>
+                              <AlertDialogTrigger asChild>
+                                <button
+                                  onClick={() => { setDeleteEntryId(entry.id); setDeleteEntryTaskId(drawerTask.id); }}
+                                  className="text-xs text-[#94A3B8] hover:text-[#EF4444] transition-colors cursor-pointer flex items-center gap-1"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                  删除
+                                </button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="max-w-[380px] w-[90vw] p-6 bg-white rounded-2xl shadow-[0_16px_32px_rgba(0,0,0,0.15)] border-0">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="text-lg font-semibold text-[#1E293B]">确认删除</AlertDialogTitle>
+                                  <AlertDialogDescription className="text-sm text-[#64748B] mt-2">
+                                    确定要删除这条更新记录吗？此操作不可恢复。
+                                    {entry.note && (
+                                      <span className="block mt-2 p-2 bg-[#F8FAFC] rounded-lg text-[#475569]">"{entry.note}"</span>
+                                    )}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter className="mt-4 flex justify-end gap-3">
+                                  <AlertDialogCancel onClick={() => setDeleteEntryId(null)}
+                                    className="px-5 py-2 bg-[#F1F5F9] text-[#334155] text-sm font-medium rounded-lg h-10 hover:bg-[#E2E8F0] transition-colors cursor-pointer"
+                                  >
+                                    取消
+                                  </AlertDialogCancel>
+                                  <AlertDialogAction onClick={confirmDeleteEntry}
+                                    className="px-5 py-2 bg-[#EF4444] text-white text-sm font-semibold rounded-lg h-10 hover:bg-[#DC2626] transition-colors cursor-pointer"
+                                  >
+                                    确认删除
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </motion.div>
                       ))}
                     </div>
