@@ -201,13 +201,13 @@ export default function Board() {
 
   return (
     <Layout dailyDigestEnabled={digest.enabled} onToggleDigest={digest.toggleEnabled} onNewTask={() => navigate("/")}>
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="mb-6">
-          <h1 className="font-bold text-[#1E293B] tracking-tight" style={{ fontSize: "2.5rem", lineHeight: 1.15 }}>项目看板</h1>
+      <div className="max-w-[1280px] mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="mb-4 sm:mb-6">
+          <h1 className="font-bold text-[#1E293B] tracking-tight text-[1.75rem] sm:text-[2rem] md:text-[2.5rem]" style={{ lineHeight: 1.15 }}>项目看板</h1>
           <p className="text-sm text-[#94A3B8] mt-1.5">按分类查看所有项目</p>
         </motion.div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-6 sm:mb-8">
           <StatCard label="项目总数" value={stats.total} color="#3B82F6" bg="#EFF6FF" delay={0} />
           {stats.categoryStats.map((stat, idx) => (
             <StatCard key={stat.name} label={stat.name} value={stat.count} color={stat.color} bg={`${stat.color}15`} delay={0.05 * (idx + 1)} />
@@ -215,11 +215,13 @@ export default function Board() {
           <StatCard label="已完成" value={stats.completed} color="#10B981" bg="#ECFDF5" delay={0.05 * (stats.categoryStats.length + 1)} />
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-5">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:gap-5 overflow-x-auto pb-2 -mx-1 px-1">
           {allCategories.map((cat, idx) => (
-            <BoardColumn key={cat.id} categoryId={cat.id}
-              categoryName={cat.name} categoryColor={cat.color}
-              tasks={grouped[cat.id] || []} columnIndex={idx} />
+            <div key={cat.id} className="lg:flex-1 lg:min-w-0 min-w-[260px] sm:min-w-[300px]">
+              <BoardColumn key={cat.id} categoryId={cat.id}
+                categoryName={cat.name} categoryColor={cat.color}
+                tasks={grouped[cat.id] || []} columnIndex={idx} />
+            </div>
           ))}
         </div>
       </div>

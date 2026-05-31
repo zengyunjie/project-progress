@@ -208,39 +208,41 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
         style={{ borderLeftWidth: "3px", borderLeftColor: borderColor }}
       >
         {/* Row 1: Drag Handle + Checkbox + Name + Badge */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-start gap-2">
           <div {...attributes} {...listeners}
-            className="shrink-0 cursor-grab active:cursor-grabbing p-0.5 rounded text-[#CBD5E1] hover:text-[#94A3B8] hover:bg-[#F1F5F9] transition-colors">
+            className="shrink-0 cursor-grab active:cursor-grabbing p-0.5 rounded text-[#CBD5E1] hover:text-[#94A3B8] hover:bg-[#F1F5F9] transition-colors mt-0.5">
             <GripVertical className="w-4 h-4" />
           </div>
-          <div className="flex items-center gap-4 flex-1 min-w-0">
-            <button onClick={() => !terminated && onToggleComplete(task.id)}
-              className={`shrink-0 ${terminated ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`} disabled={terminated}>
-              <div className={`w-[18px] h-[18px] rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                completed ? "bg-[#3B82F6] border-[#3B82F6]" : "bg-white border-[#CBD5E1] hover:border-[#60A5FA]"}`}>
-                {completed && (
-                  <motion.svg initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.2, delay: 0.1 }} width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <motion.path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.2, delay: 0.1 }} />
-                  </motion.svg>
-                )}
-              </div>
-            </button>
-            <button onClick={() => onNameClick(task)}
-              className={`flex-1 text-sm font-semibold truncate text-left cursor-pointer ${completed || terminated ? "line-through text-[#94A3B8] opacity-70" : "text-[#334155] hover:text-[#3B82F6] transition-colors"}`}>
-              <span className="font-mono text-xs text-[#94A3B8] mr-1.5">#{index + 1}</span>
-              {task.name}
-            </button>
-            {(() => {
-              const catInfo = allCategories.find((c) => c.id === task.category);
-              if (!catInfo) return null;
-              return <span className="shrink-0 px-2 py-0.5 rounded-full text-[0.625rem] font-medium" style={{ backgroundColor: catInfo.color + "20", color: catInfo.color }}>{catInfo.name}</span>;
-            })()}
-            <span className="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: badge.bg, color: badge.textColor }}>{badge.text}</span>
+          <button onClick={() => !terminated && onToggleComplete(task.id)}
+            className={`shrink-0 mt-0.5 ${terminated ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`} disabled={terminated}>
+            <div className={`w-[18px] h-[18px] rounded border-2 flex items-center justify-center transition-all duration-200 ${
+              completed ? "bg-[#3B82F6] border-[#3B82F6]" : "bg-white border-[#CBD5E1] hover:border-[#60A5FA]"}`}>
+              {completed && (
+                <motion.svg initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.2, delay: 0.1 }} width="10" height="8" viewBox="0 0 10 8" fill="none">
+                  <motion.path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.2, delay: 0.1 }} />
+                </motion.svg>
+              )}
+            </div>
+          </button>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <button onClick={() => onNameClick(task)}
+                className={`text-sm font-semibold truncate text-left cursor-pointer ${completed || terminated ? "line-through text-[#94A3B8] opacity-70" : "text-[#334155] hover:text-[#3B82F6] transition-colors"}`}>
+                <span className="font-mono text-xs text-[#94A3B8] mr-1">#{index + 1}</span>
+                {task.name}
+              </button>
+              {(() => {
+                const catInfo = allCategories.find((c) => c.id === task.category);
+                if (!catInfo) return null;
+                return <span className="shrink-0 px-2 py-0.5 rounded-full text-[0.625rem] font-medium whitespace-nowrap" style={{ backgroundColor: catInfo.color + "20", color: catInfo.color }}>{catInfo.name}</span>;
+              })()}
+              <span className="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap" style={{ backgroundColor: badge.bg, color: badge.textColor }}>{badge.text}</span>
+            </div>
           </div>
         </div>
 
         {/* Row 2: Dates */}
-        <div className="flex items-center gap-4 mt-2 ml-[34px] flex-wrap">
+        <div className="flex items-center gap-3 sm:gap-4 mt-2 ml-[28px] flex-wrap">
           <div className="flex items-center gap-1 text-xs text-[#94A3B8]">
             <Calendar className="w-3 h-3" />
             <span className="font-mono">创建: {formatDate(task.createdDate)} {getWeekday(task.createdDate)}</span>
@@ -261,11 +263,11 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
         </div>
 
         {/* Row 3: Progress + Actions */}
-        <div className="flex items-center justify-between mt-3 ml-[34px]">
+        <div className="flex items-end justify-between mt-3 ml-[28px] gap-2">
           <div className="flex flex-col gap-1.5 flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-[#94A3B8]">进度</span>
-              <div className="w-[120px] sm:w-[160px] h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
+              <span className="text-xs text-[#94A3B8] hidden sm:inline">进度</span>
+              <div className="w-[80px] sm:w-[120px] md:w-[160px] h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
                 <motion.div
                   key={`pb-${task.id}-${task.progress}`}
                   initial={{ width: 0 }} animate={{ width: `${task.progress}%` }} transition={{ duration: 0.6, ease: "easeOut" }}
@@ -658,11 +660,11 @@ export default function Dashboard() {
       {/* Hidden file input for import */}
       <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleFileChange} />
 
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 flex gap-6">
+      <div className="max-w-[1280px] mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 flex gap-4 md:gap-6">
         {/* Sidebar */}
         <motion.aside
           initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.1 }}
-          className="hidden lg:block w-[240px] shrink-0 bg-white border-r border-[#E2E8F0] min-h-[calc(100dvh-64px-64px)] sticky top-16 p-5"
+          className="hidden lg:block w-[220px] xl:w-[240px] shrink-0 bg-white border-r border-[#E2E8F0] min-h-[calc(100dvh-64px-64px)] sticky top-16 p-4 xl:p-5"
         >
           <p className="text-xs text-[#94A3B8] uppercase tracking-widest mb-3 font-medium">筛选</p>
           <div className="flex flex-col gap-1">
@@ -735,7 +737,7 @@ export default function Dashboard() {
           </AnimatePresence>
 
           {/* Stats Row */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
             <StatsCard icon={Inbox} iconColor="#64748B" iconBg="#F1F5F9" value={stats.total} label="任务总数" delay={0.1} />
             <StatsCard icon={TrendingUp} iconColor="#3B82F6" iconBg="#EFF6FF" value={stats.inProgress} label="进行中" delay={0.2} />
             <StatsCard icon={Check} iconColor="#10B981" iconBg="#ECFDF5" value={stats.completed} label="已完成" delay={0.3} />
@@ -743,7 +745,7 @@ export default function Dashboard() {
           </div>
 
           {/* Mobile Filter Pills */}
-          <div className="lg:hidden flex gap-2 mb-4 overflow-x-auto pb-1">
+          <div className="lg:hidden flex gap-1.5 sm:gap-2 mb-3 sm:mb-4 overflow-x-auto pb-1 -mx-1 px-1">
             {[{ k: "all" as FilterType, l: "全部" }, { k: "in-progress" as FilterType, l: "进行中" }, { k: "completed" as FilterType, l: "已完成" }, { k: "overdue" as FilterType, l: "已逾期" }].map(({ k, l }) => (
               <button key={k} onClick={() => setFilter(k)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
@@ -755,8 +757,8 @@ export default function Dashboard() {
           </div>
 
           {/* Search & Sort Bar */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center gap-3 mb-5">
-            <div className="relative flex-1 max-w-[400px]">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
+            <div className="relative flex-1 md:max-w-[400px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)}
                 placeholder="搜索任务名称..."
@@ -1233,7 +1235,7 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      <Toaster position="bottom-right" />
+      <Toaster position="bottom-center" className="md:!bottom-4 md:!right-4" />
 
       {/* Inline Deadline Editor */}
       <Dialog open={!!inlineDeadlineTask} onOpenChange={() => setInlineDeadlineTask(null)}>
@@ -1282,7 +1284,7 @@ export default function Dashboard() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-              className="fixed top-0 right-0 h-full w-[420px] max-w-[95vw] bg-white shadow-[-8px_0_30px_rgba(0,0,0,0.12)] z-[950] flex flex-col overflow-hidden"
+              className="fixed top-0 right-0 h-full w-full md:w-[420px] max-w-[100vw] bg-white shadow-[-8px_0_30px_rgba(0,0,0,0.12)] z-[950] flex flex-col overflow-hidden"
             >
               {/* Header */}
               <div className="px-5 py-4 border-b border-[#E2E8F0] bg-[#EFF6FF] shrink-0">

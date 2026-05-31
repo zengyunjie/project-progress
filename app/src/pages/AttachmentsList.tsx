@@ -66,16 +66,16 @@ export default function AttachmentsList() {
 
   return (
     <Layout dailyDigestEnabled={false} onNewTask={() => {}}>
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-[1280px] mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-          className="mb-6">
+          className="mb-4 sm:mb-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center">
               <Paperclip className="w-5 h-5 text-[#3B82F6]" />
             </div>
             <div>
-              <h1 className="text-[1.5rem] font-bold text-[#1E293B]">项目附件清单</h1>
+              <h1 className="text-[1.25rem] sm:text-[1.5rem] font-bold text-[#1E293B]">项目附件清单</h1>
               <p className="text-xs text-[#94A3B8]">
                 {projectGroups.length} 个项目 · <span className="tabular-nums">{totalAttachments}</span> 个附件
               </p>
@@ -85,8 +85,8 @@ export default function AttachmentsList() {
 
         {/* Search */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
-          className="flex items-center gap-3 mb-5">
-          <div className="relative flex-1 max-w-[400px]">
+          className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
+          <div className="relative flex-1 md:max-w-[400px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
             <Input value={search} onChange={(e) => setSearch(e.target.value)}
               placeholder="搜索项目名称或附件名称..."
