@@ -12,13 +12,13 @@ import { useTaskManager } from "@/hooks/useTaskManager";
 import type { Task, ProgressEntry } from "@/types";
 
 const statusColors: Record<Task["status"], string> = {
-  active: "#14B8A6", completed: "#10B981", overdue: "#F43F5E", terminated: "#94A3B8",
+  active: "#3B82F6", completed: "#10B981", overdue: "#F43F5E", terminated: "#94A3B8",
 };
 const statusBgColors: Record<Task["status"], string> = {
-  active: "#F0FDFA", completed: "#ECFDF5", overdue: "#FFF1F2", terminated: "#F1F5F9",
+  active: "#EFF6FF", completed: "#ECFDF5", overdue: "#FFF1F2", terminated: "#F1F5F9",
 };
 const statusTextColors: Record<Task["status"], string> = {
-  active: "#0D9488", completed: "#059669", overdue: "#E11D48", terminated: "#64748B",
+  active: "#2563EB", completed: "#059669", overdue: "#E11D48", terminated: "#64748B",
 };
 
 const statusLabels: Record<Task["status"], string> = {
@@ -189,13 +189,13 @@ export default function HistoryPage() {
                 <motion.div initial={{ opacity: 0, scale: 0.95, y: -4 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -4 }} transition={{ duration: 0.2 }}
                   style={{ originY: 0 }} className="absolute top-full left-[86px] mt-1 z-30 bg-white border border-[#E2E8F0] rounded-lg shadow-lg min-w-[220px] py-1.5">
                   <button onClick={() => handleSelectTask("all")}
-                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors cursor-pointer ${selectedTaskId === "all" ? "bg-[#F0FDFA] text-[#0D9488] font-medium" : "text-[#475569] hover:bg-[#F8FAFC]"}`}>
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors cursor-pointer ${selectedTaskId === "all" ? "bg-[#EFF6FF] text-[#2563EB] font-medium" : "text-[#475569] hover:bg-[#F8FAFC]"}`}>
                     <span className="w-2 h-2 rounded-full bg-[#94A3B8]" /> 全部任务
                     <span className="ml-auto text-[0.75rem] text-[#94A3B8]">{tasks.reduce((acc, t) => acc + t.history.length, 0)}</span>
                   </button>
                   {tasks.map((task) => (
                     <button key={task.id} onClick={() => handleSelectTask(task.id)}
-                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors cursor-pointer ${selectedTaskId === task.id ? "bg-[#F0FDFA] text-[#0D9488] font-medium" : "text-[#475569] hover:bg-[#F8FAFC]"}`}>
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors cursor-pointer ${selectedTaskId === task.id ? "bg-[#EFF6FF] text-[#2563EB] font-medium" : "text-[#475569] hover:bg-[#F8FAFC]"}`}>
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: statusColors[task.status] }} />
                       <span className="truncate">{task.name}</span>
                       <span className="ml-auto text-[0.75rem] text-[#94A3B8] shrink-0">{task.history.length}</span>
@@ -208,7 +208,7 @@ export default function HistoryPage() {
           <div className="flex-1 sm:max-w-[360px] sm:ml-auto relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
             <input type="text" placeholder="搜索更新备注..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-9 pr-4 bg-white border border-[#E2E8F0] rounded-lg text-sm text-[#334155] placeholder:text-[#CBD5E1] focus:outline-none focus:border-[#14B8A6] focus:ring-[3px] focus:ring-[rgba(20,184,166,0.1)] transition-all" />
+              className="w-full h-10 pl-9 pr-4 bg-white border border-[#E2E8F0] rounded-lg text-sm text-[#334155] placeholder:text-[#CBD5E1] focus:outline-none focus:border-[#3B82F6] focus:ring-[3px] focus:ring-[rgba(59,130,246,0.1)] transition-all" />
           </div>
         </motion.div>
 
@@ -221,7 +221,7 @@ export default function HistoryPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { v: stats.totalUpdates, l: "更新总数", c: "#14B8A6", d: 0.3 },
+              { v: stats.totalUpdates, l: "更新总数", c: "#3B82F6", d: 0.3 },
               { v: stats.uniqueTasks, l: "追踪任务数", c: "#3B82F6", d: 0.4 },
               { v: stats.avgIncrease + "%", l: "平均进度增幅", c: "#F59E0B", d: 0.5, icon: true },
               { v: stats.latestUpdate ? getRelativeTimeLabel(parseISO(stats.latestUpdate)) : "—", l: "最近更新", c: "#10B981", d: 0.6 },
@@ -248,18 +248,18 @@ export default function HistoryPage() {
               <h3 className="text-[1.25rem] font-semibold text-[#64748B]">暂无更新</h3>
               <p className="text-sm text-[#94A3B8] mt-1">编辑任务后的进度更新将显示在这里</p>
               <button onClick={() => navigate("/")}
-                className="mt-6 px-6 py-2.5 bg-[#14B8A6] text-white text-sm font-semibold rounded-lg hover:bg-[#2DD4BF] transition-colors cursor-pointer">前往任务面板</button>
+                className="mt-6 px-6 py-2.5 bg-[#3B82F6] text-white text-sm font-semibold rounded-lg hover:bg-[#60A5FA] transition-colors cursor-pointer">前往任务面板</button>
             </>) : (<>
               <Filter className="w-12 h-12 text-[#CBD5E1] mb-4" />
               <h3 className="text-[1.125rem] font-semibold text-[#64748B]">没有匹配的更新</h3>
               <p className="text-sm text-[#94A3B8] mt-1">试试调整筛选条件</p>
               <button onClick={handleClearFilters}
-                className="mt-4 text-sm font-medium text-[#14B8A6] hover:text-[#0D9488] transition-colors cursor-pointer">清除筛选</button>
+                className="mt-4 text-sm font-medium text-[#3B82F6] hover:text-[#2563EB] transition-colors cursor-pointer">清除筛选</button>
             </>)}
           </motion.div>
         ) : (
           <div className="relative">
-            <div className="absolute left-[19px] top-0 bottom-0 w-[2px] bg-[#14B8A6] opacity-20 hidden sm:block" />
+            <div className="absolute left-[19px] top-0 bottom-0 w-[2px] bg-[#3B82F6] opacity-20 hidden sm:block" />
             {Array.from(grouped.entries()).map(([month, daysMap]) => (
               <motion.div key={month} initial="hidden" animate="visible" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }} className="mb-8">
                 <motion.div variants={{ hidden: { opacity: 0, scaleX: 0.8 }, visible: { opacity: 1, scaleX: 1, transition: { duration: 0.3 } } }} className="mb-4">
@@ -292,7 +292,7 @@ export default function HistoryPage() {
                             <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
                               <span className="font-mono text-[0.8125rem] font-medium text-[#64748B]">{format(date, "HH:mm")}</span>
                               <button onClick={(e) => { e.stopPropagation(); navigate(`/?taskId=${entry.taskId}`); }}
-                                className="text-[0.9375rem] font-semibold text-[#334155] hover:text-[#0D9488] hover:underline transition-colors cursor-pointer">{entry.task.name}</button>
+                                className="text-[0.9375rem] font-semibold text-[#334155] hover:text-[#2563EB] hover:underline transition-colors cursor-pointer">{entry.task.name}</button>
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[0.75rem] font-medium"
                                 style={{ backgroundColor: statusBgColors[entry.task.status], color: statusTextColors[entry.task.status] }}>{statusLabels[entry.task.status]}</span>
                             </div>
@@ -301,7 +301,7 @@ export default function HistoryPage() {
                                 {entry.previousProgress !== null ? (<>
                                   <span className="text-[#94A3B8]">{entry.previousProgress}%</span>
                                   <span className="text-[#CBD5E1]">→</span>
-                                  <span className={`font-semibold ${isIncrease ? "text-[#0D9488]" : "text-[#64748B]"}`}>{entry.progress}%</span>
+                                  <span className={`font-semibold ${isIncrease ? "text-[#2563EB]" : "text-[#64748B]"}`}>{entry.progress}%</span>
                                   {entry.progress === 100 && <span className="text-[#059669] font-semibold ml-1">完成!</span>}
                                 </>) : (
                                   <span className="text-[#64748B] italic">创建 — 初始进度: {entry.progress}%</span>
@@ -349,7 +349,7 @@ export default function HistoryPage() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <button onClick={() => navigate(`/?taskId=${detailEntry.taskId}`)}
-                    className="text-[1.125rem] font-semibold text-[#0D9488] hover:underline transition-colors cursor-pointer">{detailEntry.task.name}</button>
+                    className="text-[1.125rem] font-semibold text-[#2563EB] hover:underline transition-colors cursor-pointer">{detailEntry.task.name}</button>
                   <p className="font-mono text-[0.8125rem] text-[#94A3B8] mt-1">{format(parseISO(detailEntry.timestamp), "yyyy-MM-dd HH:mm:ss")}</p>
                 </div>
                 <button onClick={() => setDetailEntry(null)} className="p-1.5 rounded-lg hover:bg-[#F1F5F9] transition-colors cursor-pointer">
@@ -363,7 +363,7 @@ export default function HistoryPage() {
                   {detailEntry.previousProgress !== null ? (<>
                     <span className="text-[1.5rem] font-bold text-[#1E293B]">{detailEntry.previousProgress}% → {detailEntry.progress}%</span>
                     {detailEntry.progress > detailEntry.previousProgress && (
-                      <span className="text-[0.875rem] font-semibold text-[#14B8A6]">+{detailEntry.progress - detailEntry.previousProgress}%</span>
+                      <span className="text-[0.875rem] font-semibold text-[#3B82F6]">+{detailEntry.progress - detailEntry.previousProgress}%</span>
                     )}
                   </>) : (
                     <span className="text-[1.5rem] font-bold text-[#1E293B]">初始: {detailEntry.progress}%</span>

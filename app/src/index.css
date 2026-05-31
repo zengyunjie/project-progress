@@ -10,7 +10,7 @@
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 168 76% 36%;
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 11%;
@@ -22,8 +22,16 @@
     --destructive-foreground: 0 0% 100%;
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 168 76% 36%;
+    --ring: 221 83% 53%;
     --radius: 0.5rem;
+    --sidebar-background: 224 71% 4%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 223 47% 11%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 223 27% 13%;
+    --sidebar-ring: 221 83% 53%;
 
     /* Custom design tokens */
     --slate-50: #F8FAFC;
@@ -36,21 +44,20 @@
     --slate-700: #334155;
     --slate-800: #1E293B;
     --slate-900: #0F172A;
-    --teal-50: #F0FDFA;
-    --teal-400: #2DD4BF;
-    --teal-500: #14B8A6;
-    --teal-600: #0D9488;
+    --blue-50: #EFF6FF;
+    --blue-100: #DBEAFE;
+    --blue-200: #BFDBFE;
+    --blue-400: #60A5FA;
+    --blue-500: #3B82F6;
+    --blue-600: #2563EB;
+    --blue-700: #1D4ED8;
+    --blue-800: #1E40AF;
     --amber-50: #FFFBEB;
     --amber-500: #F59E0B;
     --rose-50: #FFF1F2;
     --rose-500: #F43F5E;
     --emerald-50: #ECFDF5;
     --emerald-500: #10B981;
-    --blue-50: #EFF6FF;
-    --blue-200: #BFDBFE;
-    --blue-500: #3B82F6;
-    --blue-600: #2563EB;
-    --blue-700: #1D4ED8;
 
     /* Programmer number font */
     --font-mono-num: 'JetBrains Mono', 'Fira Code', 'SF Mono', ui-monospace, monospace;

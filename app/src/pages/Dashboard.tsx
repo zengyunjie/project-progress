@@ -5,7 +5,7 @@ import {
   Inbox, TrendingUp, Check, AlertTriangle, Search, Bell, X,
   Plus, Pencil, Trash2, History, Calendar, Clock, ChevronDown,
   ChevronRight, OctagonX, Paperclip, FileText, SlidersHorizontal,
-  GripVertical,
+  GripVertical, Download, Upload, Undo2, Eye, RefreshCw,
 } from "lucide-react";
 import type { DragEndEvent } from "@dnd-kit/core";
 import {
@@ -60,7 +60,7 @@ function getStatusBadge(task: Task): { text: string; bg: string; textColor: stri
   const deadline = new Date(task.deadline);
   const diffDays = Math.ceil((deadline.getTime() - today.getTime()) / 86400000);
   if (diffDays <= 3 && diffDays >= 0) return { text: "即将到期", bg: "#FFFBEB", textColor: "#D97706" };
-  return { text: "进行中", bg: "#F0FDFA", textColor: "#0D9488" };
+  return { text: "进行中", bg: "#EFF6FF", textColor: "#2563EB" };
 }
 
 function getBorderColor(task: Task): string {
@@ -71,7 +71,7 @@ function getBorderColor(task: Task): string {
   const deadline = new Date(task.deadline);
   const diffDays = Math.ceil((deadline.getTime() - today.getTime()) / 86400000);
   if (diffDays <= 3 && diffDays >= 0) return "#F59E0B";
-  return "#14B8A6";
+  return "#3B82F6";
 }
 
 function formatDate(dateStr: string): string {
@@ -217,7 +217,7 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
             <button onClick={() => !terminated && onToggleComplete(task.id)}
               className={`shrink-0 ${terminated ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`} disabled={terminated}>
               <div className={`w-[18px] h-[18px] rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                completed ? "bg-[#14B8A6] border-[#14B8A6]" : "bg-white border-[#CBD5E1] hover:border-[#2DD4BF]"}`}>
+                completed ? "bg-[#3B82F6] border-[#3B82F6]" : "bg-white border-[#CBD5E1] hover:border-[#60A5FA]"}`}>
                 {completed && (
                   <motion.svg initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.2, delay: 0.1 }} width="10" height="8" viewBox="0 0 10 8" fill="none">
                     <motion.path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.2, delay: 0.1 }} />
@@ -226,7 +226,7 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
               </div>
             </button>
             <button onClick={() => onNameClick(task)}
-              className={`flex-1 text-sm font-semibold truncate text-left cursor-pointer ${completed || terminated ? "line-through text-[#94A3B8] opacity-70" : "text-[#334155] hover:text-[#14B8A6] transition-colors"}`}>
+              className={`flex-1 text-sm font-semibold truncate text-left cursor-pointer ${completed || terminated ? "line-through text-[#94A3B8] opacity-70" : "text-[#334155] hover:text-[#3B82F6] transition-colors"}`}>
               <span className="font-mono text-xs text-[#94A3B8] mr-1.5">#{index + 1}</span>
               {task.name}
             </button>
@@ -250,7 +250,7 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
             {isOverdue(task) && <AlertTriangle className="w-3 h-3" />}
             {isDueSoon(task) && !isOverdue(task) && <AlertTriangle className="w-3 h-3 text-[#F59E0B]" />}
             <button onClick={(e) => { e.stopPropagation(); onDeadlineClick(task); }}
-              className="font-mono hover:underline hover:text-[#14B8A6] transition-colors cursor-pointer"
+              className="font-mono hover:underline hover:text-[#3B82F6] transition-colors cursor-pointer"
               title="点击修改截止日期">
               截止: {formatDate(task.deadline)} {getWeekday(task.deadline)}
             </button>
@@ -270,7 +270,7 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
                   key={`pb-${task.id}-${task.progress}`}
                   initial={{ width: 0 }} animate={{ width: `${task.progress}%` }} transition={{ duration: 0.6, ease: "easeOut" }}
                   className="h-full rounded-full"
-                  style={{ backgroundColor: terminated ? "#94A3B8" : completed ? "#10B981" : task.status === "overdue" ? "#FB7185" : "#14B8A6" }} />
+                  style={{ backgroundColor: terminated ? "#94A3B8" : completed ? "#10B981" : task.status === "overdue" ? "#FB7185" : "#3B82F6" }} />
               </div>
               <span className="text-xs font-semibold text-[#475569] tabular-nums">{task.progress}%</span>
             </div>
@@ -288,7 +288,7 @@ function SortableTaskCard({ task, index, allCategories, onToggleComplete, onEdit
             )}
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            <button onClick={() => onEdit(task)} className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#14B8A6] hover:bg-[#F0FDFA] transition-all duration-150 cursor-pointer" title="编辑">
+            <button onClick={() => onEdit(task)} className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#3B82F6] hover:bg-[#EFF6FF] transition-all duration-150 cursor-pointer" title="编辑">
               <Pencil className="w-3.5 h-3.5" />
             </button>
             <button onClick={() => onHistory(task)} className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#3B82F6] hover:bg-[#EFF6FF] transition-all duration-150 cursor-pointer" title="查看历史">
@@ -347,7 +347,7 @@ export default function Dashboard() {
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [showCategoryManageDialog, setShowCategoryManageDialog] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryColor, setNewCategoryColor] = useState("#14B8A6");
+  const [newCategoryColor, setNewCategoryColor] = useState("#3B82F6");
 
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
   const [showTerminated, setShowTerminated] = useState(false);
@@ -379,12 +379,9 @@ export default function Dashboard() {
     setDeleteEntryId(null);
     setDeleteEntryTaskId("");
     // Refresh drawer task with updated history
-    setTasks((prev) => {
-      const t = prev.find((t) => t.id === deleteEntryTaskId);
-      if (t) setDrawerTask({ ...t });
-      return prev;
-    });
-  }, [deleteEntryId, deleteEntryTaskId]);
+    const updated = tasks.find((t) => t.id === deleteEntryTaskId);
+    if (updated) setDrawerTask({ ...updated });
+  }, [deleteEntryId, deleteEntryTaskId, deleteHistoryEntry, tasks]);
 
   const openInlineDeadline = useCallback((task: Task) => {
     setInlineDeadlineTask(task);
@@ -628,7 +625,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-[#F8FAFC] gap-4">
-        <div className="w-10 h-10 border-4 border-[#E2E8F0] border-t-[#14B8A6] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[#E2E8F0] border-t-[#3B82F6] rounded-full animate-spin" />
         <p className="text-sm text-[#64748B] font-medium">正在加载数据...</p>
       </div>
     );
@@ -675,7 +672,7 @@ export default function Dashboard() {
                 className={`flex items-center justify-between px-3 py-2 rounded-md text-sm transition-all duration-150 cursor-pointer ${
                   filter === k
                     ? k === "overdue" ? "bg-[#FFF1F2] text-[#E11D48] font-medium border-l-2 border-[#F43F5E]"
-                    : "bg-[#F0FDFA] text-[#0D9488] font-medium border-l-2 border-[#14B8A6]"
+                    : "bg-[#EFF6FF] text-[#2563EB] font-medium border-l-2 border-[#3B82F6]"
                     : k === "overdue" ? "text-[#F43F5E] hover:bg-[#FFF1F2]" : "text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#334155]"
                 }`}
               >
@@ -690,26 +687,26 @@ export default function Dashboard() {
             <div className="flex justify-between text-sm"><span className="text-[#64748B]">任务总数</span><span className="font-semibold text-[#334155] text-base tabular-nums">{stats.total}</span></div>
             <div className="flex justify-between text-sm"><span className="text-[#64748B]">今日到期</span><span className={`font-semibold text-base tabular-nums ${digestCounts.dueToday > 0 ? "text-[#F59E0B]" : "text-[#334155]"}`}>{digestCounts.dueToday}</span></div>
             <div className="flex justify-between text-sm"><span className="text-[#64748B]">已逾期</span><span className={`font-semibold text-base tabular-nums ${stats.overdue > 0 ? "text-[#F43F5E]" : "text-[#334155]"}`}>{stats.overdue}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-[#64748B]">完成率</span><span className="font-semibold text-[#14B8A6] text-base tabular-nums">{stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}%</span></div>
+            <div className="flex justify-between text-sm"><span className="text-[#64748B]">完成率</span><span className="font-semibold text-[#3B82F6] text-base tabular-nums">{stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}%</span></div>
           </div>
 
           <p className="text-xs text-[#94A3B8] uppercase tracking-widest mt-8 mb-3 font-medium">状态图例</p>
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2 text-[0.8125rem] text-[#64748B]"><span className="w-2 h-2 rounded-full bg-[#14B8A6]" /> 正常进行</div>
+            <div className="flex items-center gap-2 text-[0.8125rem] text-[#64748B]"><span className="w-2 h-2 rounded-full bg-[#3B82F6]" /> 正常进行</div>
             <div className="flex items-center gap-2 text-[0.8125rem] text-[#64748B]"><span className="w-2 h-2 rounded-full bg-[#F59E0B]" /> 即将到期</div>
             <div className="flex items-center gap-2 text-[0.8125rem] text-[#64748B]"><span className="w-2 h-2 rounded-full bg-[#F43F5E]" /> 已逾期</div>
             <div className="flex items-center gap-2 text-[0.8125rem] text-[#64748B]"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> 已完成</div>
           </div>
 
           <p className="text-xs text-[#94A3B8] uppercase tracking-widest mt-8 mb-3 font-medium">操作</p>
-          <button onClick={() => setShowCategoryManageDialog(true)} className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-[#14B8A6] hover:bg-[#F0FDFA] transition-colors cursor-pointer">
+          <button onClick={() => setShowCategoryManageDialog(true)} className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-[#3B82F6] hover:bg-[#EFF6FF] transition-colors cursor-pointer">
             <SlidersHorizontal className="w-4 h-4" /> 管理分类颜色
           </button>
           <button onClick={handleExport} className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#334155] transition-colors cursor-pointer">
-            <DownloadIcon className="w-4 h-4" /> 导出数据
+            <Download className="w-4 h-4" /> 导出数据
           </button>
           <button onClick={handleImport} className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#334155] transition-colors cursor-pointer">
-            <UploadIcon className="w-4 h-4" /> 导入数据
+            <Upload className="w-4 h-4" /> 导入数据
           </button>
           <button onClick={() => setClearDataOpen(true)} className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-[#F43F5E] hover:bg-[#FFF1F2] transition-colors cursor-pointer mt-1">
             <Trash2 className="w-4 h-4" /> 清除全部数据
@@ -740,7 +737,7 @@ export default function Dashboard() {
           {/* Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatsCard icon={Inbox} iconColor="#64748B" iconBg="#F1F5F9" value={stats.total} label="任务总数" delay={0.1} />
-            <StatsCard icon={TrendingUp} iconColor="#14B8A6" iconBg="#F0FDFA" value={stats.inProgress} label="进行中" delay={0.2} />
+            <StatsCard icon={TrendingUp} iconColor="#3B82F6" iconBg="#EFF6FF" value={stats.inProgress} label="进行中" delay={0.2} />
             <StatsCard icon={Check} iconColor="#10B981" iconBg="#ECFDF5" value={stats.completed} label="已完成" delay={0.3} />
             <StatsCard icon={AlertTriangle} iconColor="#F43F5E" iconBg="#FFF1F2" value={stats.overdue} label="已逾期" delay={0.4} />
           </div>
@@ -750,7 +747,7 @@ export default function Dashboard() {
             {[{ k: "all" as FilterType, l: "全部" }, { k: "in-progress" as FilterType, l: "进行中" }, { k: "completed" as FilterType, l: "已完成" }, { k: "overdue" as FilterType, l: "已逾期" }].map(({ k, l }) => (
               <button key={k} onClick={() => setFilter(k)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                  filter === k ? "bg-[#F0FDFA] text-[#0D9488]" : "bg-white text-[#64748B] border border-[#E2E8F0]"
+                  filter === k ? "bg-[#EFF6FF] text-[#2563EB]" : "bg-white text-[#64748B] border border-[#E2E8F0]"
                 }`}>
                 {l} <span className="tabular-nums">({filterCounts[k]})</span>
               </button>
@@ -763,7 +760,7 @@ export default function Dashboard() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)}
                 placeholder="搜索任务名称..."
-                className="h-10 pl-10 pr-4 rounded-lg bg-[#F1F5F9] border-0 text-sm text-[#64748B] placeholder:text-[#94A3B8] focus:bg-white focus:ring-2 focus:ring-[#14B8A6]/20 focus:border-[#14B8A6] transition-all" />
+                className="h-10 pl-10 pr-4 rounded-lg bg-[#F1F5F9] border-0 text-sm text-[#64748B] placeholder:text-[#94A3B8] focus:bg-white focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all" />
             </div>
             <div className="relative">
               <button onClick={() => setShowSortDropdown(!showSortDropdown)}
@@ -783,7 +780,7 @@ export default function Dashboard() {
                       { key: "progress-low" as const, label: "进度低→高" },
                     ].map((opt) => (
                       <button key={opt.key} onClick={() => { setSortBy(opt.key); setShowSortDropdown(false); }}
-                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer ${sortBy === opt.key ? "text-[#0D9488] font-medium bg-[#F0FDFA]" : "text-[#64748B] hover:bg-[#F8FAFC]"}`}>
+                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer ${sortBy === opt.key ? "text-[#2563EB] font-medium bg-[#EFF6FF]" : "text-[#64748B] hover:bg-[#F8FAFC]"}`}>
                         {opt.label}
                       </button>
                     ))}
@@ -809,7 +806,7 @@ export default function Dashboard() {
                         <Search className="w-12 h-12 text-[#CBD5E1] mb-4" />
                         <p className="text-lg font-semibold text-[#64748B]">没有匹配的任务</p>
                         <p className="text-sm text-[#94A3B8] mt-1">试试调整搜索条件或筛选器</p>
-                        <button onClick={() => { setSearch(""); setFilter("all"); }} className="mt-3 text-sm font-medium text-[#14B8A6] hover:underline cursor-pointer">清除筛选</button>
+                        <button onClick={() => { setSearch(""); setFilter("all"); }} className="mt-3 text-sm font-medium text-[#3B82F6] hover:underline cursor-pointer">清除筛选</button>
                       </>) : (<>
                         <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
                           <Inbox className="w-16 h-16 text-[#CBD5E1] mb-4" />
@@ -817,7 +814,7 @@ export default function Dashboard() {
                         <p className="text-xl font-semibold text-[#64748B]">还没有任务</p>
                         <p className="text-sm text-[#94A3B8] mt-1">创建第一个任务开始管理吧</p>
                         <motion.button whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }} onClick={openNewTask}
-                          className="mt-4 flex items-center gap-1.5 px-5 py-2.5 bg-[#14B8A6] text-white text-sm font-semibold rounded-lg cursor-pointer">
+                          className="mt-4 flex items-center gap-1.5 px-5 py-2.5 bg-[#3B82F6] text-white text-sm font-semibold rounded-lg cursor-pointer">
                           <Plus className="w-4 h-4" /> 创建任务
                         </motion.button>
                       </>)}
@@ -867,9 +864,9 @@ export default function Dashboard() {
                                   <span className="shrink-0 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F1F5F9] text-[#64748B]">已终止</span>
                                   <button onClick={() => handleRestore(task)}
                                     className="w-8 h-8 flex items-center justify-center rounded-md text-[#F59E0B] hover:text-[#D97706] hover:bg-[#FFFBEB] cursor-pointer transition-all" title="恢复项目">
-                                    <UndoIcon className="w-3.5 h-3.5" />
+                                    <Undo2 className="w-3.5 h-3.5" />
                                   </button>
-                                  <button onClick={() => openEditTask(task)} className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#14B8A6] cursor-pointer" title="编辑"><Pencil className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => openEditTask(task)} className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#3B82F6] cursor-pointer" title="编辑"><Pencil className="w-3.5 h-3.5" /></button>
                                   <button onClick={() => handleDelete(task)} className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#F43F5E] cursor-pointer" title="删除"><Trash2 className="w-3.5 h-3.5" /></button>
                                 </div>
                               </motion.div>
@@ -900,7 +897,7 @@ export default function Dashboard() {
               <label className="block text-[0.8125rem] font-medium text-[#64748B] mb-1">项目名称 <span className="text-[#F43F5E]">*</span></label>
               <Input value={formName} onChange={(e) => { setFormName(e.target.value); if (formErrors.name) setFormErrors((p) => ({ ...p, name: undefined })); }}
                 placeholder="输入项目名称..."
-                className={`h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#14B8A6]/20 focus:border-[#14B8A6] transition-all ${formErrors.name ? "ring-2 ring-[#F43F5E]" : ""}`} />
+                className={`h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all ${formErrors.name ? "ring-2 ring-[#F43F5E]" : ""}`} />
               {formErrors.name && <p className="text-xs text-[#F43F5E] mt-1">{formErrors.name}</p>}
             </motion.div>
 
@@ -909,12 +906,12 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mb-1">
                 <label className="text-[0.8125rem] font-medium text-[#64748B]">分类 <span className="text-[#F43F5E]">*</span></label>
                 <button onClick={() => setShowCategoryDialog(true)}
-                  className="text-[0.6875rem] text-[#14B8A6] hover:text-[#0D9488] font-medium cursor-pointer transition-colors" type="button">+ 新建分类</button>
+                  className="text-[0.6875rem] text-[#3B82F6] hover:text-[#2563EB] font-medium cursor-pointer transition-colors" type="button">+ 新建分类</button>
                 <button onClick={() => setShowCategoryManageDialog(true)}
                   className="text-[0.6875rem] text-[#64748B] hover:text-[#334155] font-medium cursor-pointer transition-colors" type="button">管理分类</button>
               </div>
               <Select value={formCategory} onValueChange={(v) => setFormCategory(v)}>
-                <SelectTrigger className="h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#14B8A6]/20 focus:border-[#14B8A6] transition-all w-full">
+                <SelectTrigger className="h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all w-full">
                   <SelectValue placeholder="选择分类..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -932,12 +929,12 @@ export default function Dashboard() {
               <div className="flex-1">
                 <label className="block text-[0.8125rem] font-medium text-[#64748B] mb-1">创建日期</label>
                 <Input type="date" value={formCreated} onChange={(e) => { setFormCreated(e.target.value); if (!editingTask) setFormDeadline(getDefaultDeadline(e.target.value)); }}
-                  className="h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#14B8A6]/20 focus:border-[#14B8A6] transition-all" />
+                  className="h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all" />
               </div>
               <div className="flex-1">
                 <label className="block text-[0.8125rem] font-medium text-[#64748B] mb-1">截止日期 <span className="text-[#F43F5E]">*</span></label>
                 <Input type="date" value={formDeadline} onChange={(e) => { setFormDeadline(e.target.value); if (formErrors.deadline) setFormErrors((p) => ({ ...p, deadline: undefined })); }}
-                  className={`h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#14B8A6]/20 focus:border-[#14B8A6] transition-all ${formErrors.deadline ? "ring-2 ring-[#F43F5E]" : ""}`} />
+                  className={`h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all ${formErrors.deadline ? "ring-2 ring-[#F43F5E]" : ""}`} />
                 {formErrors.deadline && <p className="text-xs text-[#F43F5E] mt-1">{formErrors.deadline}</p>}
               </div>
             </motion.div>
@@ -946,7 +943,7 @@ export default function Dashboard() {
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-[0.8125rem] font-medium text-[#64748B]">进度</label>
-                <span className="px-3 py-0.5 rounded-full bg-[#F0FDFA] text-[#0D9488] text-xs font-semibold tabular-nums">{formProgress}%</span>
+                <span className="px-3 py-0.5 rounded-full bg-[#EFF6FF] text-[#2563EB] text-xs font-semibold tabular-nums">{formProgress}%</span>
               </div>
               <Slider value={[formProgress]} onValueChange={(v) => setFormProgress(v[0])} max={100} step={1} className="w-full" />
             </motion.div>
@@ -956,7 +953,7 @@ export default function Dashboard() {
               <label className="block text-[0.8125rem] font-medium text-[#64748B] mb-1">更新备注 (可选)</label>
               <Textarea value={formNote} onChange={(e) => setFormNote(e.target.value.slice(0, 200))}
                 placeholder="描述本次更新的内容..."
-                rows={3} className="rounded-lg px-4 py-3 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#14B8A6]/20 focus:border-[#14B8A6] transition-all resize-none" />
+                rows={3} className="rounded-lg px-4 py-3 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all resize-none" />
               <p className="text-xs text-[#94A3B8] mt-1 text-right tabular-nums">{formNote.length}/200</p>
             </motion.div>
 
@@ -977,7 +974,7 @@ export default function Dashboard() {
                             <div key={entry.id} className="flex items-center gap-3 text-xs py-1.5 px-2 rounded-md bg-[#F8FAFC]">
                               <span className="font-mono text-[#94A3B8] shrink-0 min-w-[130px]">{formatDateTime(entry.timestamp)}</span>
                               <div className="w-12 h-1 bg-[#E2E8F0] rounded-full overflow-hidden shrink-0">
-                                <div className="h-full bg-[#14B8A6] rounded-full transition-all duration-500" style={{ width: `${entry.progress}%` }} />
+                                <div className="h-full bg-[#3B82F6] rounded-full transition-all duration-500" style={{ width: `${entry.progress}%` }} />
                               </div>
                               <span className="font-mono text-[#475569] font-semibold shrink-0 w-8 tabular-nums">{entry.progress}%</span>
                               <span className="text-[#64748B] truncate">{entry.note}</span>
@@ -1012,10 +1009,10 @@ export default function Dashboard() {
                           <span className="text-[#94A3B8] font-mono text-[0.625rem] shrink-0 tabular-nums">{(att.size / 1024).toFixed(1)} KB</span>
                           <button onClick={() => setPreviewAttachment({ name: att.name, dataUrl: att.dataUrl })}
                             className="w-6 h-6 flex items-center justify-center rounded text-[#3B82F6] hover:text-[#2563EB] hover:bg-[#EFF6FF] transition-all cursor-pointer shrink-0" title="预览">
-                            <EyeIcon className="w-3 h-3" />
+                            <Eye className="w-3 h-3" />
                           </button>
-                          <label className="w-6 h-6 flex items-center justify-center rounded text-[#94A3B8] hover:text-[#14B8A6] hover:bg-[#F0FDFA] transition-all cursor-pointer shrink-0" title="替换">
-                            <ReplaceIcon className="w-3 h-3" />
+                          <label className="w-6 h-6 flex items-center justify-center rounded text-[#94A3B8] hover:text-[#3B82F6] hover:bg-[#EFF6FF] transition-all cursor-pointer shrink-0" title="替换">
+                            <RefreshCw className="w-3 h-3" />
                             <input type="file" className="hidden" onChange={async (e) => {
                               const file = e.target.files?.[0]; if (!file || !editingTask) return;
                               await updateAttachment(editingTask.id, att.id, file); e.target.value = "";
@@ -1046,7 +1043,7 @@ export default function Dashboard() {
                 <button onClick={() => setModalOpen(false)}
                   className="px-5 py-2 bg-[#F1F5F9] text-[#334155] text-sm font-medium rounded-lg h-10 hover:bg-[#E2E8F0] transition-colors cursor-pointer">取消</button>
                 <motion.button whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }} onClick={handleSaveTask}
-                  className="px-5 py-2 bg-[#14B8A6] text-white text-sm font-semibold rounded-lg h-10 hover:bg-[#2DD4BF] transition-colors shadow-[0_4px_12px_rgba(20,184,166,0.3)] cursor-pointer">保存</motion.button>
+                  className="px-5 py-2 bg-[#3B82F6] text-white text-sm font-semibold rounded-lg h-10 hover:bg-[#60A5FA] transition-colors shadow-[0_4px_12px_rgba(59,130,246,0.3)] cursor-pointer">保存</motion.button>
               </div>
             </motion.div>
           </div>
@@ -1064,12 +1061,12 @@ export default function Dashboard() {
               <label className="block text-[0.8125rem] font-medium text-[#64748B] mb-1">分类名称</label>
               <Input value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="输入分类名称..."
-                className="h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#14B8A6]/20 focus:border-[#14B8A6] transition-all" />
+                className="h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all" />
             </div>
             <div>
               <label className="block text-[0.8125rem] font-medium text-[#64748B] mb-2">颜色</label>
               <div className="flex gap-2 flex-wrap">
-                {["#14B8A6", "#3B82F6", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#F97316"].map((color) => (
+                {["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#F97316"].map((color) => (
                   <button key={color} onClick={() => setNewCategoryColor(color)} type="button"
                     className={`w-8 h-8 rounded-full transition-all cursor-pointer ${newCategoryColor === color ? "ring-2 ring-offset-2 ring-[#334155]" : ""}`}
                     style={{ backgroundColor: color }} />
@@ -1077,7 +1074,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-2">
-              <button onClick={() => { setShowCategoryDialog(false); setNewCategoryName(""); setNewCategoryColor("#14B8A6"); }}
+              <button onClick={() => { setShowCategoryDialog(false); setNewCategoryName(""); setNewCategoryColor("#3B82F6"); }}
                 className="px-5 py-2 bg-[#F1F5F9] text-[#334155] text-sm font-medium rounded-lg h-10 hover:bg-[#E2E8F0] transition-colors cursor-pointer">取消</button>
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                 onClick={async () => {
@@ -1086,9 +1083,9 @@ export default function Dashboard() {
                   setFormCategory(newCat.id);
                   setShowCategoryDialog(false);
                   setNewCategoryName("");
-                  setNewCategoryColor("#14B8A6");
+                  setNewCategoryColor("#3B82F6");
                 }}
-                className="px-5 py-2 bg-[#14B8A6] text-white text-sm font-semibold rounded-lg h-10 hover:bg-[#2DD4BF] transition-colors cursor-pointer">添加</motion.button>
+                className="px-5 py-2 bg-[#3B82F6] text-white text-sm font-semibold rounded-lg h-10 hover:bg-[#60A5FA] transition-colors cursor-pointer">添加</motion.button>
             </div>
           </div>
         </DialogContent>
@@ -1210,7 +1207,7 @@ export default function Dashboard() {
                   </div>
                   <span className="flex-1 text-sm font-semibold text-[#334155]">{cat.name}</span>
                   <div className="flex gap-1.5 items-center">
-                    {["#14B8A6", "#3B82F6", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#F97316", "#84CC16", "#64748B", "#0EA5E9", "#D946EF"].map((color) => (
+                    {["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#F97316", "#84CC16", "#64748B", "#0EA5E9", "#D946EF"].map((color) => (
                       <button key={color} onClick={() => updateCategory(cat.id, { color })} type="button"
                         className={`w-[22px] h-[22px] rounded-full transition-all cursor-pointer hover:scale-125 hover:shadow-md ${
                           cat.color === color ? "ring-[2.5px] ring-offset-1 ring-[#334155] scale-110 shadow-md" : ""
@@ -1225,11 +1222,11 @@ export default function Dashboard() {
           </ScrollArea>
           <div className="flex justify-between mt-5 pt-4 border-t border-[#E2E8F0]">
             <button onClick={() => { setShowCategoryDialog(true); setShowCategoryManageDialog(false); }}
-              className="px-4 py-2 text-sm font-medium text-[#14B8A6] hover:text-[#0D9488] hover:bg-[#F0FDFA] rounded-lg cursor-pointer transition-colors">
+              className="px-4 py-2 text-sm font-medium text-[#3B82F6] hover:text-[#2563EB] hover:bg-[#EFF6FF] rounded-lg cursor-pointer transition-colors">
               + 新建分类
             </button>
             <button onClick={() => { setShowCategoryManageDialog(false); toast.success("分类颜色已更新"); }}
-              className="px-5 py-2 bg-[#14B8A6] text-white text-sm font-semibold rounded-lg h-10 hover:bg-[#2DD4BF] transition-colors cursor-pointer shadow-[0_4px_12px_rgba(20,184,166,0.3)]">
+              className="px-5 py-2 bg-[#3B82F6] text-white text-sm font-semibold rounded-lg h-10 hover:bg-[#60A5FA] transition-colors cursor-pointer shadow-[0_4px_12px_rgba(59,130,246,0.3)]">
               完成
             </button>
           </div>
@@ -1252,13 +1249,13 @@ export default function Dashboard() {
               type="date"
               value={inlineDeadlineValue}
               onChange={(e) => setInlineDeadlineValue(e.target.value)}
-              className="h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#14B8A6]/20 focus:border-[#14B8A6] transition-all"
+              className="h-11 rounded-lg px-4 text-sm bg-[#F1F5F9] border-0 focus:bg-white focus:ring-2 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6] transition-all"
             />
             <div className="flex justify-end gap-3 mt-2">
               <button onClick={() => setInlineDeadlineTask(null)}
                 className="px-5 py-2 bg-[#F1F5F9] text-[#334155] text-sm font-medium rounded-lg h-10 hover:bg-[#E2E8F0] transition-colors cursor-pointer">取消</button>
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleInlineDeadlineSave}
-                className="px-5 py-2 bg-[#14B8A6] text-white text-sm font-semibold rounded-lg h-10 hover:bg-[#2DD4BF] transition-colors shadow-[0_4px_12px_rgba(20,184,166,0.3)] cursor-pointer">保存</motion.button>
+                className="px-5 py-2 bg-[#3B82F6] text-white text-sm font-semibold rounded-lg h-10 hover:bg-[#60A5FA] transition-colors shadow-[0_4px_12px_rgba(59,130,246,0.3)] cursor-pointer">保存</motion.button>
             </div>
           </div>
         </DialogContent>
@@ -1288,7 +1285,7 @@ export default function Dashboard() {
               className="fixed top-0 right-0 h-full w-[420px] max-w-[95vw] bg-white shadow-[-8px_0_30px_rgba(0,0,0,0.12)] z-[950] flex flex-col overflow-hidden"
             >
               {/* Header */}
-              <div className="px-5 py-4 border-b border-[#E2E8F0] bg-[#F0FDFA] shrink-0">
+              <div className="px-5 py-4 border-b border-[#E2E8F0] bg-[#EFF6FF] shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <h3 className="text-sm font-bold text-[#1E293B] truncate">{drawerTask.name}</h3>
@@ -1383,7 +1380,7 @@ export default function Dashboard() {
                   </span>
                   <button
                     onClick={() => { navigate(`/history?taskId=${drawerTask.id}`); setDrawerTask(null); }}
-                    className="text-xs font-medium text-[#14B8A6] hover:text-[#0D9488] transition-colors cursor-pointer"
+                    className="text-xs font-medium text-[#3B82F6] hover:text-[#2563EB] transition-colors cursor-pointer"
                   >
                     查看完整记录 →
                   </button>
@@ -1394,45 +1391,5 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
     </Layout>
-  );
-}
-
-/* Inline icon components */
-function DownloadIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  );
-}
-function UploadIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
-    </svg>
-  );
-}
-
-function UndoIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-    </svg>
-  );
-}
-
-function EyeIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function ReplaceIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="17 1 21 5 17 9" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><polyline points="7 23 3 19 7 15" /><path d="M21 13v2a4 4 0 0 1-4 4H3" />
-    </svg>
   );
 }

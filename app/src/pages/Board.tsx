@@ -42,7 +42,7 @@ function isDueSoon(task: Task): boolean {
 function getStatusBadge(task: Task): { text: string; bg: string; textColor: string } {
   if (task.status === "completed") return { text: "已完成", bg: "#ECFDF5", textColor: "#059669" };
   if (task.status === "overdue") return { text: "已逾期", bg: "#FFF1F2", textColor: "#E11D48" };
-  return { text: "进行中", bg: "#F0FDFA", textColor: "#0D9488" };
+  return { text: "进行中", bg: "#EFF6FF", textColor: "#2563EB" };
 }
 
 /* ─────────────── Task Card ─────────────── */
@@ -62,7 +62,7 @@ function TaskCard({ task, index }: { task: Task; index: number }) {
       <p className="text-sm font-semibold text-[#1E293B] truncate mb-2.5" title={task.name}>{task.name}</p>
       <div className="flex items-center gap-2 mb-2.5">
         <div className="h-[6px] rounded-full bg-[#E2E8F0] overflow-hidden" style={{ width: 100 }}>
-          <motion.div className="h-full rounded-full bg-[#14B8A6]"
+          <motion.div className="h-full rounded-full bg-[#3B82F6]"
             initial={{ width: 0 }} animate={{ width: `${task.progress}%` }}
             transition={{ duration: 0.6, delay: index * 0.06 + 0.2, ease: "easeOut" }} />
         </div>
@@ -208,7 +208,7 @@ export default function Board() {
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
-          <StatCard label="项目总数" value={stats.total} color="#14B8A6" bg="#F0FDFA" delay={0} />
+          <StatCard label="项目总数" value={stats.total} color="#3B82F6" bg="#EFF6FF" delay={0} />
           {stats.categoryStats.map((stat, idx) => (
             <StatCard key={stat.name} label={stat.name} value={stat.count} color={stat.color} bg={`${stat.color}15`} delay={0.05 * (idx + 1)} />
           ))}

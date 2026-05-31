@@ -36,7 +36,7 @@ function getStatusBadge(task: Task): { text: string; bg: string; textColor: stri
   const deadline = new Date(task.deadline);
   const diffDays = Math.ceil((deadline.getTime() - today.getTime()) / 86400000);
   if (diffDays <= 3 && diffDays >= 0) return { text: "即将到期", bg: "#FFFBEB", textColor: "#D97706", dot: "#F59E0B" };
-  return { text: "进行中", bg: "#F0FDFA", textColor: "#0D9488", dot: "#14B8A6" };
+  return { text: "进行中", bg: "#EFF6FF", textColor: "#2563EB", dot: "#3B82F6" };
 }
 
 /* ─────────────── Overview Stats ─────────────── */
@@ -146,7 +146,7 @@ function CategoryCard({
             {hiddenCount > 0 && (
               <button
                 onClick={() => navigate("/")}
-                className="flex items-center justify-center gap-1.5 py-1.5 text-xs text-[#94A3B8] hover:text-[#14B8A6] transition-colors cursor-pointer"
+                className="flex items-center justify-center gap-1.5 py-1.5 text-xs text-[#94A3B8] hover:text-[#3B82F6] transition-colors cursor-pointer"
               >
                 <GripHorizontal className="w-3 h-3" />
                 还有 {hiddenCount} 个项目，去控制台查看
@@ -255,7 +255,7 @@ export default function Categories() {
           <div className="flex items-center gap-2">
             <motion.button whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}
               onClick={() => navigate("/")}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#14B8A6] text-white text-sm font-semibold rounded-lg hover:bg-[#2DD4BF] transition-colors cursor-pointer shadow-[0_2px_8px_rgba(20,184,166,0.3)]">
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#3B82F6] text-white text-sm font-semibold rounded-lg hover:bg-[#60A5FA] transition-colors cursor-pointer shadow-[0_2px_8px_rgba(59,130,246,0.3)]">
               <Plus className="w-3.5 h-3.5" /> 新建任务
             </motion.button>
           </div>
@@ -264,7 +264,7 @@ export default function Categories() {
         {/* ── Overview Stats ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
           <OverviewCard icon={Inbox} label="项目总数" value={stats.total} color="#64748B" bg="#F1F5F9" delay={0} />
-          <OverviewCard icon={TrendingUp} label="进行中" value={stats.active} color="#14B8A6" bg="#F0FDFA" delay={0.05} />
+          <OverviewCard icon={TrendingUp} label="进行中" value={stats.active} color="#3B82F6" bg="#EFF6FF" delay={0.05} />
           <OverviewCard icon={CheckCircle2} label="已完成" value={stats.completed} color="#10B981" bg="#ECFDF5" delay={0.1} />
           <OverviewCard icon={AlertTriangle} label="已逾期" value={stats.overdue} color="#F43F5E" bg="#FFF1F2" delay={0.15} />
         </div>
@@ -292,7 +292,7 @@ export default function Categories() {
             <p className="text-sm text-[#94A3B8] mt-1">创建第一个项目，开始按分类管理</p>
             <motion.button whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}
               onClick={() => navigate("/")}
-              className="mt-4 flex items-center gap-1.5 px-5 py-2.5 bg-[#14B8A6] text-white text-sm font-semibold rounded-lg cursor-pointer shadow-[0_4px_12px_rgba(20,184,166,0.3)]">
+              className="mt-4 flex items-center gap-1.5 px-5 py-2.5 bg-[#3B82F6] text-white text-sm font-semibold rounded-lg cursor-pointer shadow-[0_4px_12px_rgba(59,130,246,0.3)]">
               <Plus className="w-4 h-4" /> 创建第一个项目
             </motion.button>
           </motion.div>
