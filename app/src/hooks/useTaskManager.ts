@@ -178,6 +178,9 @@ export function useTaskManager() {
     const entryId = generateId();
     const now = new Date().toISOString();
 
+    // Assign sort_order: highest existing + 1, so new tasks appear at bottom in manual mode
+    const maxOrder = tasks.reduce((max, t) => Math.max(max, t.sort_order), -1);
+
     const task: Task = {
       id: taskId,
       name: data.name,
@@ -194,7 +197,7 @@ export function useTaskManager() {
         note: data.note || "创建任务",
       }],
       attachments: [],
-      sort_order: 0,
+      sort_order: maxOrder + 1,
     };
     task.status = getStatus(task);
 
@@ -210,7 +213,7 @@ export function useTaskManager() {
       deadline: data.deadline,
       progress: data.progress,
       status: task.status,
-      sort_order: 0,
+      sort_order: task.sort_order,
     });
 
     await supabase.from("progress_entries").insert({

@@ -325,7 +325,7 @@ export default function Dashboard() {
 
   const [filter, setFilter] = useState<FilterType>("all");
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "deadline" | "progress-high" | "progress-low">("newest");
+  const [sortBy, setSortBy] = useState<"manual" | "newest" | "oldest" | "deadline" | "progress-high" | "progress-low">("manual");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [digestDismissed, setDigestDismissed] = useState(false);
 
@@ -460,6 +460,7 @@ export default function Dashboard() {
       result = result.filter((t) => t.name.toLowerCase().includes(q));
     }
     switch (sortBy) {
+      case "manual": result.sort((a, b) => a.sort_order - b.sort_order); break;
       case "newest": result.sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()); break;
       case "oldest": result.sort((a, b) => new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime()); break;
       case "deadline": result.sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()); break;
@@ -472,6 +473,9 @@ export default function Dashboard() {
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
+
+    // Switch to manual sort mode so the user's custom order sticks
+    setSortBy("manual");
 
     const oldIndex = filteredTasks.findIndex((t) => t.id === active.id);
     const newIndex = filteredTasks.findIndex((t) => t.id === over.id);
@@ -773,6 +777,7 @@ export default function Dashboard() {
                   <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}
                     className="absolute right-0 top-12 z-20 bg-white rounded-xl border border-[#E2E8F0] shadow-[0_8px_24px_rgba(0,0,0,0.1)] py-1 min-w-[180px]">
                     {[
+                      { key: "manual" as const, label: "默认顺序" },
                       { key: "newest" as const, label: "最新优先" },
                       { key: "oldest" as const, label: "最早优先" },
                       { key: "deadline" as const, label: "按截止日期" },
