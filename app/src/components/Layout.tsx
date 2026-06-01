@@ -52,11 +52,12 @@ export default function Layout({
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
+        isMobile={isMobile}
       />
 
       {/* Main Content Area */}
       <div
-        className="flex-1 flex flex-col min-h-[100dvh] transition-all duration-300 w-full"
+        className="flex-1 flex flex-col min-h-[100dvh] transition-[margin] duration-250 w-full"
         style={{ marginLeft: isMobile ? 0 : (sidebarCollapsed ? 72 : 240) }}
       >
         {/* Top Bar */}

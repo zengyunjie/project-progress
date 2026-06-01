@@ -12,13 +12,14 @@ import {
   ChevronRight,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
   mobileOpen: boolean;
   onMobileClose: () => void;
+  isMobile: boolean;
 }
 
 const navItems = [
@@ -30,17 +31,9 @@ const navItems = [
   { path: "/settings", label: "系统设置", icon: Settings },
 ];
 
-export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose, isMobile }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1024);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/" || location.pathname === "/index.html";
