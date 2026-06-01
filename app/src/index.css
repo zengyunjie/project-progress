@@ -79,6 +79,23 @@
     scroll-behavior: smooth;
   }
 
+  /* Mobile tap highlight removal */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  @media (max-width: 1023px) {
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  /* Smooth momentum scrolling on iOS */
+  .overflow-x-auto, .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Global tabular-nums utility for all numeric text */
   .tabular-nums,
   .font-mono {

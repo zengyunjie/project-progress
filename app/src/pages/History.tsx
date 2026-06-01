@@ -157,11 +157,11 @@ export default function HistoryPage() {
 
   return (
     <Layout dailyDigestEnabled={digest.enabled} onToggleDigest={digest.toggleEnabled} onNewTask={() => { }}>
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+      <div className="max-w-[1280px] mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div>
             <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: easeOut }}
-              className="text-[1.875rem] sm:text-[2.5rem] font-bold text-[#1E293B] tracking-[-0.02em] leading-[1.1]">更新历史</motion.h1>
+              className="text-[1.75rem] sm:text-[2rem] md:text-[2.5rem] font-bold text-[#1E293B] tracking-[-0.02em] leading-[1.1]">更新历史</motion.h1>
             <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1, ease: easeOut }}
               className="text-[0.9375rem] text-[#94A3B8] mt-2">追踪所有任务的每一次进度更新</motion.p>
           </div>
@@ -174,10 +174,10 @@ export default function HistoryPage() {
 
         {/* Filter Bar */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2, ease: easeOut }}
-          className="flex flex-col sm:flex-row gap-3 mb-6">
+          className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4 sm:mb-6">
           <div className="relative" ref={dropdownRef}>
             <div className="flex items-center gap-2">
-              <span className="text-[0.8125rem] font-medium text-[#64748B]">按任务筛选:</span>
+              <span className="text-[0.75rem] sm:text-[0.8125rem] font-medium text-[#64748B] shrink-0">按任务筛选:</span>
               <button onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 px-4 py-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#334155] text-sm font-medium rounded-lg h-10 transition-colors cursor-pointer min-w-[180px]">
                 <span className="truncate">{selectedTaskName}</span>
@@ -219,7 +219,7 @@ export default function HistoryPage() {
             <BarChart3 className="w-4 h-4 text-[#94A3B8]" />
             <span className="text-[0.8125rem] font-semibold text-[#64748B]">历史概览</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {[
               { v: stats.totalUpdates, l: "更新总数", c: "#3B82F6", d: 0.3 },
               { v: stats.uniqueTasks, l: "追踪任务数", c: "#3B82F6", d: 0.4 },

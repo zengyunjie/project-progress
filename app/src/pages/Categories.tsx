@@ -242,12 +242,12 @@ export default function Categories() {
   return (
     <Layout dailyDigestEnabled={digest.enabled} onToggleDigest={digest.toggleEnabled}
       onNewTask={() => navigate("/")}>
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
         {/* ── Header ── */}
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
-          className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-[2rem] sm:text-[2.5rem] font-bold text-[#1E293B] tracking-tight leading-tight">
+            <h1 className="text-[1.75rem] sm:text-[2rem] md:text-[2.5rem] font-bold text-[#1E293B] tracking-tight leading-tight">
               分类总览
             </h1>
             <p className="text-sm text-[#94A3B8] mt-1.5">按项目类别分组，墙纸视图一目了然</p>
@@ -262,15 +262,15 @@ export default function Categories() {
         </motion.div>
 
         {/* ── Overview Stats ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-6 sm:mb-8">
           <OverviewCard icon={Inbox} label="项目总数" value={stats.total} color="#64748B" bg="#F1F5F9" delay={0} />
           <OverviewCard icon={TrendingUp} label="进行中" value={stats.active} color="#3B82F6" bg="#EFF6FF" delay={0.05} />
           <OverviewCard icon={CheckCircle2} label="已完成" value={stats.completed} color="#10B981" bg="#ECFDF5" delay={0.1} />
           <OverviewCard icon={AlertTriangle} label="已逾期" value={stats.overdue} color="#F43F5E" bg="#FFF1F2" delay={0.15} />
         </div>
 
-        {/* ── Wallpaper Grid: max 4 columns ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+        {/* ── Wallpaper Grid ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4">
           {allCategories.map((cat, idx) => (
             <CategoryCard
               key={cat.id}
