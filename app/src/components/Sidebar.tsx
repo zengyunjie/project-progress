@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  Shield,
 } from "lucide-react";
 import { useEffect } from "react";
 
@@ -20,6 +21,7 @@ interface SidebarProps {
   mobileOpen: boolean;
   onMobileClose: () => void;
   isMobile: boolean;
+  isAdmin?: boolean;
 }
 
 const navItems = [
@@ -31,7 +33,7 @@ const navItems = [
   { path: "/settings", label: "系统设置", icon: Settings },
 ];
 
-export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose, isMobile }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose, isMobile, isAdmin }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -134,6 +136,32 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
               </button>
             );
           })}
+
+          {/* Admin link */}
+          {isAdmin && (
+            <button
+              onClick={() => {
+                navigate("/admin");
+                if (isMobile) onMobileClose();
+              }}
+              className={`
+                flex items-center gap-3 rounded-lg transition-all duration-150 cursor-pointer
+                ${collapsed && !isMobile ? "justify-center px-0 py-2.5 mt-2" : "px-3 py-2.5 mt-2"}
+                ${location.pathname === "/admin"
+                  ? "bg-[#F59E0B]/20 text-[#FBBF24]"
+                  : "text-[#94A3B8] hover:bg-[#1E293B] hover:text-[#FBBF24]"
+                }
+              `}
+              title={collapsed ? "用户管理" : undefined}
+            >
+              <Shield className={`w-5 h-5 shrink-0 ${location.pathname === "/admin" ? "text-[#FBBF24]" : ""}`} />
+              {(!collapsed || isMobile) && (
+                <span className={`text-sm font-medium whitespace-nowrap ${location.pathname === "/admin" ? "font-semibold" : ""}`}>
+                  用户管理
+                </span>
+              )}
+            </button>
+          )}
         </nav>
 
         {/* Collapse toggle (desktop) */}

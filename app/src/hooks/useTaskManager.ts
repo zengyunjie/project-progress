@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { Task, ProgressEntry, Attachment, CustomCategory } from "@/types";
 import { DEFAULT_CATEGORIES } from "@/types";
 import { supabase } from "@/lib/supabase";
+import * as XLSX from "xlsx";
 
 function generateId(): string {
   return Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
@@ -581,6 +582,71 @@ export function useTaskManager() {
     return JSON.stringify(data, null, 2);
   }, [tasks, allCategories]);
 
+  const exportExcel = useCallback((): void => {
+    // Build flat data for Excel export
+    const rows: Record<string, unknown>[] = [];
+
+    tasks.forEach((task) => {
+      const categoryInfo = allCategories.find((c) => c.id === task.category);
+      const statusLabels: Record<string, string> = {
+        active: "进行中",
+        completed: "已完成",
+        overdue: "已逾期",
+        terminated: "已终止",
+      };
+
+      rows.push({
+        "任务名称": task.name,
+        "分类": categoryInfo?.name || task.category,
+        "状态": statusLabels[task.status] || task.status,
+        "进度(%)": task.progress,
+        "创建日期": task.createdDate,
+        "截止日期": task.deadline,
+        "更新记录数": task.history.length,
+        "附件数": task.attachments?.length || 0,
+        "最后更新": task.history.length > 0
+          ? [...task.history].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0].note
+          : "",
+      });
+    });
+
+    // Also export progress history in a separate sheet (optional, for detailed analysis)
+    const historyRows: Record<string, unknown>[] = [];
+    tasks.forEach((task) => {
+      task.history.forEach((entry) => {
+        historyRows.push({
+          "任务名称": task.name,
+          "时间": new Date(entry.timestamp).toLocaleString("zh-CN"),
+          "进度(%)": entry.progress,
+          "备注": entry.note,
+        });
+      });
+    });
+
+    const wb = XLSX.utils.book_new();
+    const taskSheet = XLSX.utils.json_to_sheet(rows);
+    const historySheet = XLSX.utils.json_to_sheet(historyRows);
+
+    // Set column widths
+    taskSheet["!cols"] = [
+      { wch: 30 }, // 任务名称
+      { wch: 15 }, // 分类
+      { wch: 10 }, // 状态
+      { wch: 10 }, // 进度
+      { wch: 12 }, // 创建日期
+      { wch: 12 }, // 截止日期
+      { wch: 10 }, // 更新记录数
+      { wch: 8 },  // 附件数
+      { wch: 30 }, // 最后更新
+    ];
+
+    XLSX.utils.book_append_sheet(wb, taskSheet, "任务列表");
+    XLSX.utils.book_append_sheet(wb, historySheet, "更新历史");
+
+    const today = new Date().toISOString().split("T")[0];
+    XLSX.writeFile(wb, `项目进度数据_${today}.xlsx`);
+  }, [tasks, allCategories]);
+
   const importData = useCallback(async (json: string): Promise<boolean> => {
     try {
       const data = JSON.parse(json);
@@ -696,6 +762,7 @@ export function useTaskManager() {
     removeAttachment,
     updateAttachment,
     exportData,
+    exportExcel,
     importData,
     clearAllData,
     reorderTasks,

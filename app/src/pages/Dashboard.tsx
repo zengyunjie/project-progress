@@ -314,7 +314,7 @@ export default function Dashboard() {
     tasks, addTask, updateTask, deleteTask, toggleComplete,
     terminateTask, restoreTask, deleteHistoryEntry, allCategories, addCustomCategory,
     updateCategory, deleteCategory,
-    addAttachment, removeAttachment, updateAttachment, exportData, importData, clearAllData,
+    exportData, exportExcel, importData, clearAllData,
     reorderTasks, loading, error, refreshData,
   } = useTaskManager();
   const digest = useDailyDigest();
@@ -595,8 +595,13 @@ export default function Dashboard() {
     a.download = `项目进度数据_${getToday()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("数据已导出");
+    toast.success("JSON 数据已导出");
   }, [exportData]);
+
+  const handleExportExcel = useCallback(() => {
+    exportExcel();
+    toast.success("Excel 数据已导出");
+  }, [exportExcel]);
 
   const handleImport = useCallback(() => {
     fileInputRef.current?.click();
@@ -658,7 +663,8 @@ export default function Dashboard() {
       dailyDigestEnabled={digest.enabled}
       onToggleDigest={digest.toggleEnabled}
       onNewTask={openNewTask}
-      onExport={handleExport}
+      onExportJSON={handleExport}
+      onExportExcel={handleExportExcel}
       onImport={handleImport}
     >
       {/* Hidden file input for import */}
@@ -709,7 +715,10 @@ export default function Dashboard() {
             <SlidersHorizontal className="w-4 h-4" /> 管理分类颜色
           </button>
           <button onClick={handleExport} className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#334155] transition-colors cursor-pointer">
-            <Download className="w-4 h-4" /> 导出数据
+            <Download className="w-4 h-4" /> 导出 JSON
+          </button>
+          <button onClick={handleExportExcel} className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#334155] transition-colors cursor-pointer">
+            <Download className="w-4 h-4" /> 导出 Excel
           </button>
           <button onClick={handleImport} className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#334155] transition-colors cursor-pointer">
             <Upload className="w-4 h-4" /> 导入数据

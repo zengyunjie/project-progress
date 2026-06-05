@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   Search,
@@ -9,17 +9,25 @@ import {
   Download,
   Upload,
   CheckCircle2,
+  FileJson,
+  FileSpreadsheet,
+  User,
+  LogOut,
+  Shield,
+  ChevronDown,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LayoutProps {
   children: ReactNode;
   dailyDigestEnabled?: boolean;
   onToggleDigest?: () => void;
   onNewTask?: () => void;
-  onExport?: () => void;
+  onExportJSON?: () => void;
+  onExportExcel?: () => void;
   onImport?: () => void;
 }
 
@@ -28,13 +36,19 @@ export default function Layout({
   dailyDigestEnabled = false,
   onToggleDigest,
   onNewTask,
-  onExport,
+  onExportJSON,
+  onExportExcel,
   onImport,
 }: LayoutProps) {
   const navigate = useNavigate();
+  const { user, logout, isAdmin } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
 
   // Detect mobile screen size (matches sidebar overlay at lg=1024px)
   useEffect(() => {
@@ -43,6 +57,25 @@ export default function Layout({
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  // Close menus on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setExportMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-[100dvh] flex bg-[#F8FAFC]">
@@ -53,6 +86,7 @@ export default function Layout({
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
         isMobile={isMobile}
+        isAdmin={isAdmin}
       />
 
       {/* Main Content Area */}
@@ -92,7 +126,7 @@ export default function Layout({
 
           {/* Right actions */}
           <div className="flex items-center gap-1 sm:gap-2">
-            {/* Import / Export */}
+            {/* Import */}
             {onImport && (
               <button
                 onClick={onImport}
@@ -103,15 +137,50 @@ export default function Layout({
                 <span className="text-xs font-medium hidden sm:inline">导入</span>
               </button>
             )}
-            {onExport && (
-              <button
-                onClick={onExport}
-                className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#334155] transition-colors cursor-pointer min-w-[36px] min-h-[36px] justify-center"
-                title="导出数据"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span className="text-xs font-medium hidden sm:inline">导出</span>
-              </button>
+
+            {/* Export Dropdown */}
+            {(onExportJSON || onExportExcel) && (
+              <div ref={exportMenuRef} className="relative">
+                <button
+                  onClick={() => setExportMenuOpen(!exportMenuOpen)}
+                  className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-lg text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#334155] transition-colors cursor-pointer min-w-[36px] min-h-[36px] justify-center"
+                  title="导出数据"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium hidden sm:inline">导出</span>
+                  <ChevronDown className="w-3 h-3 hidden sm:block" />
+                </button>
+                <AnimatePresence>
+                  {exportMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-1 bg-white rounded-xl border border-[#E2E8F0] shadow-[0_8px_24px_rgba(0,0,0,0.1)] py-1 min-w-[160px] z-50"
+                    >
+                      {onExportJSON && (
+                        <button
+                          onClick={() => { onExportJSON(); setExportMenuOpen(false); }}
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#334155] transition-colors cursor-pointer"
+                        >
+                          <FileJson className="w-4 h-4 text-[#F59E0B]" />
+                          导出 JSON
+                        </button>
+                      )}
+                      {onExportExcel && (
+                        <button
+                          onClick={() => { onExportExcel(); setExportMenuOpen(false); }}
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#334155] transition-colors cursor-pointer"
+                        >
+                          <FileSpreadsheet className="w-4 h-4 text-[#10B981]" />
+                          导出 Excel
+                        </button>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             )}
 
             {/* Daily Digest Toggle */}
@@ -139,6 +208,60 @@ export default function Layout({
                 <span className="hidden sm:inline">新建任务</span>
                 <span className="sm:hidden">新建</span>
               </motion.button>
+            )}
+
+            {/* User Menu */}
+            {user && (
+              <div ref={userMenuRef} className="relative">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-[#F1F5F9] transition-colors cursor-pointer"
+                >
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                    isAdmin ? "bg-[#EFF6FF] text-[#3B82F6]" : "bg-[#F1F5F9] text-[#64748B]"
+                  }`}>
+                    {user.username[0].toUpperCase()}
+                  </div>
+                  <span className="text-xs font-medium text-[#334155] hidden sm:inline">
+                    {user.username}
+                  </span>
+                  <ChevronDown className="w-3 h-3 text-[#94A3B8] hidden sm:block" />
+                </button>
+                <AnimatePresence>
+                  {userMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-1 bg-white rounded-xl border border-[#E2E8F0] shadow-[0_8px_24px_rgba(0,0,0,0.1)] py-1 min-w-[180px] z-50"
+                    >
+                      <div className="px-4 py-2.5 border-b border-[#F1F5F9]">
+                        <p className="text-sm font-medium text-[#334155]">{user.username}</p>
+                        <p className="text-xs text-[#94A3B8]">
+                          {user.role === "admin" ? "管理员" : "普通用户"}
+                        </p>
+                      </div>
+                      {isAdmin && (
+                        <button
+                          onClick={() => { setUserMenuOpen(false); navigate("/admin"); }}
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#334155] transition-colors cursor-pointer"
+                        >
+                          <Shield className="w-4 h-4 text-[#3B82F6]" />
+                          用户管理
+                        </button>
+                      )}
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-[#EF4444] hover:bg-[#FFF1F2] transition-colors cursor-pointer"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        退出登录
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             )}
           </div>
         </header>
